@@ -5,8 +5,10 @@
 #include <cloudy/misc/Program_options.hpp>
 #include <cloudy/misc/Progress.hpp>
 #include <cloudy/offset/Offset.hpp>
+#include <cloudy/Cloud.hpp>
 
 #include <boost/timer.hpp>
+#include <fstream>
 #include <vector>
 #include <map>
 
@@ -32,28 +34,27 @@ void Build_regular_triangulation(std::istream &is, RT &rt,
 			 rt.insert(Weighted_point(Point(Mx, My, mz), 0.0)),
 			 rt.insert(Weighted_point(Point(Mx, My, Mz), 0.0))};
 
-   std::vector<Weighted_point> points;
-   while (1)
+   cloudy::Data_cloud points;
+   std::vector<Weighted_point> wpoints;
+   cloudy::load_cloud(is, points);
+
+   for (size_t i = 0; i < points.size(); ++i)
    {
-      Point p; double w = 0.0;
+      cloudy::uvector v = points[i];
+      if (v.size() < 4)
+	 v.resize(4,0);
 
-      is >> p; //is >> w;
-      if (is.eof() || !(is.good()))
-	 break;
-
-      points.push_back(Weighted_point(p,w));
+      Weighted_point wp(Point(v[0], v[1], v[2]), v[3]);
+      wpoints.push_back(wp);
    }
 
    boost::timer t;
    std::cerr << "Building Regular triangulation... ";
-   rt.insert(points.begin(), points.end());
+   rt.insert(wpoints.begin(), wpoints.end());
    std::cerr << "done in " << t.elapsed() << "s\n";
 
-   for (size_t i = 0 ; i < points.size(); ++i)
-      *vertex_handles++ = rt.nearest_power_vertex(points[i]);
-
-   // FIXME: this should be faster:
-   // rt.insert(points.begin(), points.end());
+   for (size_t i = 0 ; i < wpoints.size(); ++i)
+      *vertex_handles++ = rt.nearest_power_vertex(wpoints[i]);
 }
 
 template <class Subdivider, class Integrator, class RT,
@@ -82,15 +83,9 @@ operator << (std::ostream &os, const cloudy::offset::Covariance_vector &cov)
    return os;
 }
 
-int main(int argc, char **argv)
+
+void Process_all(double R, std::istream &is,  std::ostream &os)
 {
-   //
-   std::map<std::string, std::string> options;
-   std::vector<std::string> param;
-   cloudy::misc::get_options (argc, argv, options, param);
-
-   //
-
    typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
    typedef CGAL::Regular_triangulation_euclidean_traits_3<K> Traits;
    typedef CGAL::Regular_triangulation_3<Traits> RT;
@@ -102,7 +97,7 @@ int main(int argc, char **argv)
    std::vector<Vertex_handle> vertices;
    RT rt;
    
-   Build_regular_triangulation(std::cin, rt, std::back_inserter(vertices));
+   Build_regular_triangulation(is, rt, std::back_inserter(vertices));
 
    cloudy::offset::Covariance_vector test;
 
@@ -110,11 +105,34 @@ int main(int argc, char **argv)
    if (do_volume)
    {
       Batch_integrate< Clamp_subdivider, Volume_integrator<K> >
-	 (rt, vertices.begin(), vertices.end(), 0.1, std::cout);
+	 (rt, vertices.begin(), vertices.end(), R, os);
    }
    else
    {
       Batch_integrate< Clamp_subdivider, Covariance_integrator<K> >
-	 (rt, vertices.begin(), vertices.end(), 0.1, std::cout);
+	 (rt, vertices.begin(), vertices.end(), R, os);
    }
+
+}
+
+int main(int argc, char **argv)
+{
+   std::map<std::string, std::string> options;
+   std::vector<std::string> param;
+   cloudy::misc::get_options (argc, argv, options, param);
+   double R = cloudy::misc::to_double(options["R"], 0.1);
+
+   if (param.size() == 1)
+   {
+      std::ifstream is(param[0].c_str());
+      Process_all(R, is, std::cout);
+   }
+   if (param.size() == 2)
+   {
+      std::ifstream is(param[0].c_str());
+      std::ofstream os(param[1].c_str());
+      Process_all(R, is, os);
+   }
+   else
+      Process_all(R, std::cin, std::cout);
 }

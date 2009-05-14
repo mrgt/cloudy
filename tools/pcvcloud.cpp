@@ -9,12 +9,13 @@ void setup(cloudy::view::Viewer &w,
    Data_cloud_ptr cloud (new Data_cloud());
 
    if (parameters.size() == 1)
-      cloudy::load_cloud(std::cin, *cloud);
-   else
    {
+      std::cerr << parameters[0] << "\n";
       std::ifstream is(parameters[0].c_str());
       cloudy::load_cloud(is, *cloud);
    }
+   else
+      cloudy::load_cloud(std::cin, *cloud);
    
    w.add_drawer(Drawer_ptr(new Cloud_drawer(cloud)));
 }
