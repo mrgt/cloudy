@@ -7,12 +7,14 @@ set(QT_USE_QTXML 1)
 include(${QT_USE_FILE})
 
 set(cloudy_SRCS 
-  "Linear.cpp"
+  "linear/Linear.cpp"
+  "linear/Covariance.cpp"
   "misc/Program_options.cpp"
   "view/Widget.cpp"
   "view/Director.cpp")
 set(cloudy_MOC_HDR
-  "view/Widget.hpp")
+  "view/Widget.hpp"
+  "view/Editor.hpp")
 QT4_WRAP_CPP(cloudy_SRCS ${cloudy_MOC_HDR})
 
 add_library(cloudy SHARED ${cloudy_SRCS})

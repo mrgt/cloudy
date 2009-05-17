@@ -1,7 +1,12 @@
 project(cloudy)
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.4.5)
 
-find_package(CGAL REQUIRED)
+set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true)
+if (COMMAND cmake_policy)
+  cmake_policy(SET CMP0003 NEW)
+endif()
+ 
+find_package(CGAL QUIET COMPONENTS Core)
 find_package(PythonLibs REQUIRED)
 find_package(Boost COMPONENTS python REQUIRED)
 find_package(Qt4 REQUIRED)
@@ -22,7 +27,7 @@ link_libraries(lapack)
 
 add_subdirectory(dependencies)
 add_subdirectory(cloudy)
-add_subdirectory(bindings)
+#add_subdirectory(bindings)
 add_subdirectory(tools)
 
 

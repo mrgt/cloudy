@@ -57,6 +57,15 @@ void Build_regular_triangulation(std::istream &is, RT &rt,
       *vertex_handles++ = rt.nearest_power_vertex(wpoints[i]);
 }
 
+
+std::ostream &
+operator << (std::ostream &os, const cloudy::offset::Covariance_vector &cov)
+{
+   for (size_t i = 0; i < cov.size(); ++i)
+      os << cov[i] << " ";
+   return os;
+}
+
 template <class Subdivider, class Integrator, class RT,
           class Iterator>
 void
@@ -71,20 +80,13 @@ Batch_integrate(RT rt, Iterator begin, Iterator end,
    {
       typename Integrator::Result_type res =
 	 cloudy::offset::integrate<Subdivider, Integrator> (rt, *begin, R);
+      os << res << "\n";
       ++progress;
    }
 }
 
-std::ostream &
-operator << (std::ostream &os, const cloudy::offset::Covariance_vector &cov)
-{
-   for (size_t i = 0; i < cov.size(); ++i)
-      os << cov[i] << " ";
-   return os;
-}
 
-
-void Process_all(double R, std::istream &is,  std::ostream &os)
+void Process_all(std::istream &is,  std::ostream &os, bool covariance, double R)
 {
    typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
    typedef CGAL::Regular_triangulation_euclidean_traits_3<K> Traits;
@@ -101,8 +103,7 @@ void Process_all(double R, std::istream &is,  std::ostream &os)
 
    cloudy::offset::Covariance_vector test;
 
-   bool do_volume = false;
-   if (do_volume)
+   if (covariance == false)
    {
       Batch_integrate< Clamp_subdivider, Volume_integrator<K> >
 	 (rt, vertices.begin(), vertices.end(), R, os);
@@ -120,19 +121,21 @@ int main(int argc, char **argv)
    std::map<std::string, std::string> options;
    std::vector<std::string> param;
    cloudy::misc::get_options (argc, argv, options, param);
+
+   bool covariance = (options["type"] == "covariance");
    double R = cloudy::misc::to_double(options["R"], 0.1);
 
    if (param.size() == 1)
    {
       std::ifstream is(param[0].c_str());
-      Process_all(R, is, std::cout);
+      Process_all(is, std::cout, covariance, R);
    }
    if (param.size() == 2)
    {
       std::ifstream is(param[0].c_str());
       std::ofstream os(param[1].c_str());
-      Process_all(R, is, os);
+      Process_all(is, os, covariance, R);
    }
    else
-      Process_all(R, std::cin, std::cout);
+      Process_all(std::cin, std::cout, covariance, R);
 }

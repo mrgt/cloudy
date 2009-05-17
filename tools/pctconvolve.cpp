@@ -1,10 +1,5 @@
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Regular_triangulation_euclidean_traits_3.h> 
-#include <CGAL/Regular_triangulation_3.h>
-
 #include <cloudy/misc/Program_options.hpp>
 #include <cloudy/misc/Progress.hpp>
-#include <cloudy/offset/Offset.hpp>
 #include <cloudy/Cloud.hpp>
 #include <cloudy/Convolve.hpp>
 
@@ -23,8 +18,12 @@ void Process_all(double r,
     cloudy::Data_cloud points;
     cloudy::load_cloud(isCloud, points);
 
+    std::cerr << points[0] << "\n";
+
     cloudy::Data_cloud field, convolved_field;
     cloudy::load_cloud(isField, field);
+
+    std::cerr << field[0] << "\n";
 
     assert(field.size() == points.size());
     if (points.size() == 0)
@@ -39,6 +38,7 @@ void Process_all(double r,
 
     cloudy::KD_tree kd(points);
     cloudy::convolve_uniform<uvector>(kd, field, convolved_field, r);
+    std::cerr << kd.size() << " vs " << convolved_field.size();
 
     write_cloud(os, convolved_field);
 }
@@ -51,9 +51,10 @@ int main(int argc, char **argv)
    double r = cloudy::misc::to_double(options["r"], 0.05);
 
 
-   if (param.size() <= 2)
+   if (param.size() < 2)
    {
-      std::cerr << "Usage: " << argv[0] << " file.cloud file.p [outfile.p]";
+      std::cerr << "Usage: " << argv[0] << " file.cloud file.p [outfile.p]"
+		<< std::endl;
       return -1;
    }
 
