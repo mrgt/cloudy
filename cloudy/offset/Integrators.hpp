@@ -1,7 +1,7 @@
-#ifndef PCT_INTEGRATORS_HPP
-#define PCT_INTEGRATORS_HPP
+#ifndef CLOUDY_INTEGRATORS_HPP
+#define CLOUDY_INTEGRATORS_HPP
 
-#include <boost/numeric/ublas/matrix.hpp>
+#include <cloudy/linear/Linear.hpp>
 #include <math.h>
 
 namespace cloudy {
@@ -45,23 +45,9 @@ namespace cloudy {
       
       
       //////////////////////////////////////////////////////////////////////
-      
-      typedef boost::numeric::ublas::matrix <double> Covariance_matrix;
 
       // The coordinates of v are M11 M12 M13 M21 M23 M33
-      typedef boost::numeric::ublas::vector <double> Covariance_vector;
-
-      Covariance_matrix
-      covariance_to_matrix(Covariance_vector v)
-      {
-	 Covariance_matrix m(3,3);
-	 m(1,1) = v[0]; m(1,2) = v(1); m(1,3) = v(2);
-	 m(2,2) = v(1); m(2,3) = v(2);
-	 m(3,3) = v(2);
-	 
-	 // fill symmetric entries
-	 m(2, 1) = m(1,2); m(3, 1) = m(1,3); m(3,2) = m(2,3);
-      }
+      typedef cloudy::uvector Covariance_vector;
       
       template <class K>
       class Covariance_integrator

@@ -1,7 +1,7 @@
 #ifndef CLOUDY_CLOUD_HPP
 #define CLOUDY_CLOUD_HPP
 
-#include <cloudy/Linear.hpp>
+#include <cloudy/linear/Linear.hpp>
 #include <boost/numeric/ublas/vector.hpp>
 #include <string>
 #include <iostream>
@@ -18,8 +18,10 @@ namespace cloudy
       {
 	 double coord;
 	 is >> coord;
+
 	 if (!is.good() || is.eof())
 	    break;
+
 	 v.push_back(coord);
       }
       vec.resize(v.size());
@@ -30,7 +32,8 @@ namespace cloudy
    std::ostream &
    operator << (std::ostream &os, uvector v)
    {
-      std::copy(v.begin(), v.end(), std::ostream_iterator<double>(os, " "));
+      for (size_t i = 0; i < v.size(); ++i)
+	 os << v[i] << " ";
       return os;
    }
 
@@ -62,7 +65,7 @@ namespace cloudy
    write_data(std::ostream &os, Iterator begin, Iterator end)
    {
       for (; begin != end; ++begin)
-	 os << (*begin);
+	 os << (*begin) << "\n";
    }
 
    void 

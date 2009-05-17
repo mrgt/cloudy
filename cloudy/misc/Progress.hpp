@@ -1,6 +1,8 @@
 #ifndef CLOUDY_PROGRESS_HPP
 #define CLOUDY_PROGRESS_HPP
 
+#include <iostream>
+
 namespace cloudy
 {
    namespace misc

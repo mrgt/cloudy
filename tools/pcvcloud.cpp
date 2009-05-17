@@ -1,21 +1,23 @@
 #include "pctviewer.hpp"
 #include <fstream>
 
-void setup(cloudy::view::Viewer &w,
+bool setup(cloudy::view::Viewer &w,
            const std::map<std::string, std::string> &options,
            const std::vector<std::string> &parameters)
 {
 
    Data_cloud_ptr cloud (new Data_cloud());
 
-   if (parameters.size() == 1)
+   if (parameters.size() != 1)
    {
-      std::cerr << parameters[0] << "\n";
-      std::ifstream is(parameters[0].c_str());
-      cloudy::load_cloud(is, *cloud);
+      std::cerr << "usage: pcvcloud file.cloud" << std::endl;
+      return false;
    }
-   else
-      cloudy::load_cloud(std::cin, *cloud);
+
+   std::cerr << parameters[0] << "\n";
+   std::ifstream is(parameters[0].c_str());
+   cloudy::load_cloud(is, *cloud);
    
-   w.add_drawer(Drawer_ptr(new Cloud_drawer(cloud)));
+   w.add_drawer(Drawer_ptr(new Cloud_drawer("cloud", cloud)));
+   return true;
 }

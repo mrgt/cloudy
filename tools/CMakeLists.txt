@@ -9,5 +9,7 @@ set(QT_USE_QTXML 1)
 include(${QT_USE_FILE})
 
 add_executable(pcvcloud pcvcloud.cpp)
-target_link_libraries(pcvcloud cloudy)
-target_link_libraries(pcvcloud ${QT_LIBRARIES})
+target_link_libraries(pcvcloud cloudy ${QT_LIBRARIES})
+
+add_executable(pcvcovariance pcvcovariance.cpp)
+target_link_libraries(pcvcovariance cloudy ${QT_LIBRARIES})
