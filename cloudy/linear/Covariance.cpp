@@ -28,9 +28,9 @@ namespace cloudy
       umatrix matrix_from_covariance_3(const uvector v)
       {
 	 umatrix m(3,3);
-	 m(0,0) = v[0]; m(0,1) = v(1); m(0,2) = v(2);
-	 m(1,1) = v(1); m(1,2) = v(2);
-	 m(2,2) = v(2);
+	 m(0,0) = v(0); m(0,1) = v(1); m(0,2) = v(2);
+	 m(1,1) = v(3); m(1,2) = v(4);
+	 m(2,2) = v(5);
 	 
 	 // fill symmetric entries
 	 m(1, 0) = m(0,1); m(2, 0) = m(0,2); m(2,1) = m(1,2);
