@@ -33,8 +33,14 @@ namespace cloudy {
 	                   const Vector &b,
 	                   const Vector &c)
 	    {
-	       //std::cerr << "Here " << a << std::endl;
-	       _result += 1.0/6.0*fabs(a * CGAL::cross_product(b,c));
+	       const double  vol =  1.0/6.0*fabs(a * CGAL::cross_product(b,c));
+//f 0
+	       std::cerr << "a = " << a << "\n"
+			 << "b = " << b << "\n"
+			 << "c = " << c << "\n"
+			 << "vol = " << vol << "\n";
+//#endif
+	       _result += vol;
 	    }
 	    
 	    const Result_type &result() const
@@ -66,7 +72,9 @@ namespace cloudy {
 	    Covariance_integrator(const Point &center):
 	       _result(6),
 	       _center(center)
-	    {}
+	    {
+	       std::fill(_result.begin(), _result.end(), 0);
+	    }
 	    
 	    void aggregate(const Vector &a, 
 	                   const Vector &b,

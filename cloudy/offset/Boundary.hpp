@@ -11,7 +11,6 @@ namespace cloudy { namespace offset {
                  Integrator &ig) 
       {
 	 typedef typename RT::Point Point;
-	 typedef typename RT::Geom_traits::Vector_3 Vector;
 	 typedef typename RT::Edge Edge;
 	 typedef typename RT::Cell_handle Cell_handle;
 	 typedef typename RT::Vertex_handle Vertex_handle;
@@ -34,29 +33,14 @@ namespace cloudy { namespace offset {
 	    
 	    // tesselate the polygon around its first vertex
 	    typename RT::Cell_circulator c = rt.incident_cells(cell, i1, i2);
-	    typename RT::Cell_circulator begin = c; 
-	    typename RT::Cell_circulator done = c; 
-	    
-	    Vector center(rt.dual(c) - A);  c++;
-	    size_t count = 1;
-	    while (c != done)
-	    {	   
-	       center = center + (rt.dual(c) - A); 
-	       count++;
-	       c++;
-	    }
-	    center = (1.0/double(count))*center;
-      
-	    c = begin;
-	    const Point u = rt.dual(c); c++;
-	    const Point v = rt.dual(c);
-	    sub.aggregate(ig, center, u-A, v-A);
+	    typename RT::Cell_circulator done = c;
+	    const Point B (rt.dual(c)); c++;
 	    
 	    while (c != done)
 	    {
-	       const Point u = rt.dual(c); c++;
-	       const Point v = rt.dual(c);
-	       sub.aggregate(ig, center, u-A, v-A);
+	       const Point u (rt.dual(c)); c++;
+	       const Point v (rt.dual(c));
+	       sub.aggregate(ig, B-A, u-A, v-A);
 	    }
 	 }
       }

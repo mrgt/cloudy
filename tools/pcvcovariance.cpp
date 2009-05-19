@@ -54,6 +54,8 @@ bool setup(cloudy::view::Viewer &w,
 
    std::cerr << "diagonalizing covariance matrices.. ";
    Data_cloud_ptr normals (new Data_cloud());
+   Data_cloud_ptr K1 (new Data_cloud());
+   Data_cloud_ptr K2 (new Data_cloud());
    for (Data_cloud::iterator it = covariance->begin();
 	it != covariance->end(); ++it)
    {
@@ -63,10 +65,14 @@ bool setup(cloudy::view::Viewer &w,
       covariance_extract_eigen(matrix_from_covariance_3(*it), V, D);
       covariance_sort_eigen(V, D);
       normals->push_back(D[0]);
+      K1->push_back(D[1]);
+      K2->push_back(D[2]);
    }
    std::cerr << " done\n";
    
    w.add_drawer(Drawer_ptr(new Cloud_drawer("Cloud", cloud)));
    w.add_drawer(Drawer_ptr(new Direction_drawer("Normals", cloud, normals)));
+   w.add_drawer(Drawer_ptr(new Direction_drawer("K1", cloud, K1)));
+   w.add_drawer(Drawer_ptr(new Direction_drawer("K2", cloud, K2)));
    return true;
 }
