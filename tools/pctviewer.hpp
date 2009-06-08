@@ -34,7 +34,7 @@ int main(int argc, char** argv)
 
    QDialog *dialog = new QDialog;
    QHBoxLayout *layout = new QHBoxLayout;
-   QTabWidget *tab = new QTabWidget();
+   QToolBox *tab = new QToolBox();
    layout->addWidget(tab);
    w.fill_dialog(tab);
    dialog->setMaximumWidth(250);

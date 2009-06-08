@@ -14,12 +14,11 @@ namespace cloudy
    operator >> (std::istream &is, uvector &vec)
    {
       std::vector<double> v;
-      while(1)
+      while(! is.eof())
       {
 	 double coord;
-	 is >> coord;
 
-	 if (!is.good() || is.eof())
+	 if (!(is >> coord))
 	    break;
 
 	 v.push_back(coord);

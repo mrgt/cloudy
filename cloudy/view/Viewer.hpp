@@ -2,7 +2,7 @@
 #include <cloudy/view/Editor.hpp>
 #include <cloudy/Cloud.hpp>
 #include <boost/shared_ptr.hpp>
-#include <QTabWidget>
+#include <QToolBox>
 
 namespace cloudy
 {
@@ -36,6 +36,11 @@ namespace cloudy
 	 virtual void fill_editor(Editor *editor) 
 	 {
 	    editor->add_bool("Enable:", _enabled);
+	 }
+
+	 virtual size_t stride() 
+	 {
+	    return 1;
 	 }
 
 	 void enable()  {_enabled = true;} 
@@ -140,7 +145,8 @@ namespace cloudy
 	 Cloud_drawer(const std::string &name,
 	              const Data_cloud_ptr cloud):
 	    Drawer(name),
-	    _cloud(cloud)
+	    _cloud(cloud),
+	    _percentage(1.0)
 	 {}
 
 	 virtual void draw(size_t stride)
@@ -161,6 +167,14 @@ namespace cloudy
 	    Drawer::fill_editor(editor);
 	    editor->add_double("Percentage:", _percentage);
 	 }
+	 
+	 virtual size_t stride()
+	 {
+	    if (_percentage < 0.01)
+	       return _cloud->size();
+
+	    return (size_t) (1.0/_percentage);
+	 }
    };
 
    class Viewer : public  cloudy::view::GL_widget
@@ -169,6 +183,7 @@ namespace cloudy
 	 typedef std::list<Drawer_ptr> Drawer_list;
 
 	 Drawer_list _drawers;
+	 Drawer_ptr _main;
 	 
       public:
 	 Viewer(QWidget *parent): GL_widget(parent)
@@ -184,10 +199,11 @@ namespace cloudy
 	    prepaintGL();
 	    glColor3f(0.0, 0.0, 0.0);
 
+	    size_t stride = _main->stride();
 	    for (Drawer_list::iterator it =_drawers.begin();
 		 it != _drawers.end(); ++it)
 	    {
-	       if ((*it)->enabled()) (*it)->draw(1);
+	       if ((*it)->enabled()) (*it)->draw(stride);
 	    }
 	    
 	    postpaintGL();
@@ -195,10 +211,13 @@ namespace cloudy
 
 	 void add_drawer(Drawer_ptr dr)
 	 {
+	    if (_drawers.size() == 0)
+	       _main = dr;
+
 	    _drawers.push_back(dr);
 	 }
 
-	 void fill_dialog(QTabWidget *tab)
+	 void fill_dialog(QToolBox *tb)
 	 {
 	    for(Drawer_list::iterator it =_drawers.begin();
 		it != _drawers.end(); ++it)
@@ -206,7 +225,7 @@ namespace cloudy
 	       Editor *edit = new Editor();
 	       (*it)->fill_editor(edit);
 	       edit->finish();
-	       tab->addTab(edit, (*it)->name().c_str());
+	       tb->addItem(edit, (*it)->name().c_str());
 
 	       connect(edit, SIGNAL(stateChanged()),
 	               this, SLOT(updateGL()));

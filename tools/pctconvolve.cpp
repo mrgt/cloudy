@@ -18,12 +18,8 @@ void Process_all(double r,
     cloudy::Data_cloud points;
     cloudy::load_cloud(isCloud, points);
 
-    std::cerr << points[0] << "\n";
-
     cloudy::Data_cloud field, convolved_field;
     cloudy::load_cloud(isField, field);
-
-    std::cerr << field[0] << "\n";
 
     assert(field.size() == points.size());
     if (points.size() == 0)

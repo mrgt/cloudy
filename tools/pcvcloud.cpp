@@ -17,6 +17,11 @@ bool setup(cloudy::view::Viewer &w,
    std::cerr << parameters[0] << "\n";
    std::ifstream is(parameters[0].c_str());
    cloudy::load_cloud(is, *cloud);
+
+//    for (size_t i = 0; i < cloud->size(); ++i)
+//    {
+//       std::cerr << (*cloud)[i].size() << std::endl;
+//    }
    
    w.add_drawer(Drawer_ptr(new Cloud_drawer("cloud", cloud)));
    return true;
