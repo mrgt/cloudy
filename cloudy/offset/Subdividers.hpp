@@ -36,36 +36,45 @@ namespace cloudy {
 	       return ig.aggregate(na,nb,nc);
 	    }
       };
-
       
-#define binary(a1, a2, a3)  (((a1) << 0) | ((a2) << 1) | ((a3) << 2))
-
-     class Tesselate_subdivider
-     {
-	double _radius;
-	double _eps;
-
-     private:
-	template <class Integrator>
-	void tesselate_spherical_triangle(Integrator &ig,
-					  const typename Integrator::Vector &a,
-					  const typename Integrator::Vector &b,
-					  const typename Integrator::Vector &c)
-	{
-	}
-	
-	enum binary
-	{
-	   b000, b001, b010, b011,
-	   b100, b101, b110, b111,		  
-	};
-	
-	static inline size_t to_binary(bool a, bool b, bool c)
-	{
-	   return ((a ? 1 : 0) << 0)
-	      | ((b ? 1 : 0) << 1)
-	      | ((c ? 1 : 0) << 2);
-	}
+      class Tesselate_subdivider
+      {
+	    double _radius;
+	    double _eps;
+	    
+	 private:
+	    enum binary
+	    {
+	       b000, b001, b010, b011,
+	       b100, b101, b110, b111,		  
+	    };
+	    
+	    static inline size_t to_binary(bool a, bool b, bool c)
+	    {
+	       return ((a ? 1 : 0) << 0)
+		  | ((b ? 1 : 0) << 1)
+		  | ((c ? 1 : 0) << 2);
+	    }
+	    
+	    template <class Integrator>
+	    void tesselate_spherical_triangle
+	               (Integrator &ig,
+		       const typename Integrator::Vector &a,
+		       const typename Integrator::Vector &b,
+		       const typename Integrator::Vector &c)
+	    {
+	    }
+	    
+	    template <class Integrator>
+	    void split_intersecting_triangle
+                       (Integrator &ig,
+		       double a_inside,
+		       const typename Integrator::Vector &a,
+		       const typename Integrator::Vector &b,
+		       const typename Integrator::Vector &c)
+	    {
+	       
+	    }
 
 	
      public:
@@ -97,9 +106,23 @@ namespace cloudy {
 		     break;
 
 		  case b000:
-		     tesselate_spherical_triangle(a/sqrt(sqa), b/sqrt(sqb), 
-						  c/sqrt(sqc));
+		    tesselate_spherical_triangle(ig,
+						 a/sqrt(sqa),
+						 b/sqrt(sqb), 
+						 c/sqrt(sqc));
 		     break;
+
+	          case b100:
+		    split_intersecting_triangle(ig, true, a, b, c);
+		    break;
+
+	          case b010:
+		    split_intersecting_triangle(ig, true, b, c, a);
+		    break;
+
+	          case b001:
+		    split_intersecting_triangle(ig, true, c, a, b);
+		    break;
 	       }	       
 	}
      }
