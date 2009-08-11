@@ -15,8 +15,10 @@ namespace cloudy
 
    typedef cloudy::uvector uvector;
    typedef cloudy::Data_cloud Data_cloud;
+   typedef std::vector<double> Scalar_field;
 
    typedef boost::shared_ptr<Data_cloud> Data_cloud_ptr;
+   typedef boost::shared_ptr<Scalar_field> Scalar_field_ptr;
    typedef boost::shared_ptr<Data_indices> Data_indices_ptr;
    typedef boost::shared_ptr<Data_lines> Data_lines_ptr;
 
@@ -138,28 +140,51 @@ namespace cloudy
 
    class Cloud_drawer: public Drawer
    {
-	 Data_cloud_ptr _cloud;
+         Data_cloud_ptr _cloud;
+         Scalar_field_ptr _field;
 	 double _percentage;
 	 
       public:
 	 Cloud_drawer(const std::string &name,
-	              const Data_cloud_ptr cloud):
+	              const Data_cloud_ptr cloud,
+		      const Scalar_field_ptr field = Scalar_field_ptr()):
 	    Drawer(name),
 	    _cloud(cloud),
+	    _field(field),
 	    _percentage(1.0)
 	 {}
 
 	 virtual void draw(size_t stride)
 	 {
-	    size_t i = 0;
-	    glBegin(GL_POINTS);
-	    for (Data_cloud::iterator it = _cloud->begin();
-		 it != _cloud->end(); ++it, ++i)
+	    if (_field == 0)
 	    {
-	       if (i % stride == 0)
-		  gl_uvertex(*it);
+	       size_t i = 0;
+	       glBegin(GL_POINTS);
+	       for (Data_cloud::iterator it = _cloud->begin();
+		    it != _cloud->end(); ++it, ++i)
+	       {
+		  if (i % stride == 0)
+		     gl_uvertex(*it);
+	       }
+	       glEnd();
 	    }
-	    glEnd();
+	    else
+	    {
+	       size_t i = 0;
+	       glEnable(GL_POINT_SMOOTH);
+	       for (Data_cloud::iterator it = _cloud->begin();
+		    it != _cloud->end(); ++it, ++i)
+	       {
+		  if (i % stride != 0)
+		     continue;
+
+		  glPointSize((*_field)[i]);
+		  glBegin(GL_POINTS);
+		  gl_uvertex(*it);
+		  glEnd();
+	       }
+	       glDisable(GL_POINT_SMOOTH);
+	    }
 	 }
 
 	 virtual void fill_editor(Editor *editor) 
