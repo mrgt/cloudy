@@ -1,6 +1,9 @@
 add_executable(pctoffset pctoffset.cpp)
 target_link_libraries(pctoffset cloudy)
 
+add_executable(pctoffsetmc pctoffsetmc.cpp)
+target_link_libraries(pctoffsetmc cloudy)
+
 add_executable(pctconvolve pctconvolve.cpp)
 target_link_libraries(pctconvolve cloudy)
 

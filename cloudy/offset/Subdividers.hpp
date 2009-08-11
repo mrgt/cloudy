@@ -79,7 +79,7 @@ namespace cloudy {
 	
      public:
 	Tesselate_subdivider(double radius,
-			     double _eps = 0.05):
+			     double eps = 0.05):
 	   _radius(radius),
 	   _eps(eps)
 	{}
@@ -102,7 +102,7 @@ namespace cloudy {
 	       switch(to_binary(sqa <= sqrad, sqb <= sqrad, sqc <= sqrad))
 	       {
 		  case b111:
-		     ig.aggregate(na,nb,nc);
+		     ig.aggregate(a,b,c);
 		     break;
 
 		  case b000:
@@ -125,8 +125,8 @@ namespace cloudy {
 		    break;
 	       }	       
 	}
-     }
-   } 
+     };
+   }
 }
 
 #endif 
