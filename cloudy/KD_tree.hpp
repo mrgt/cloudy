@@ -93,7 +93,7 @@ namespace cloudy
 	 }
 
 	 size_t
-	 find_nn(const uvector&p)
+	 find_nn(const uvector &p) const
 	 {
 	    std::vector<double> query(_dim);
 	    std::vector<int> indices(1);
