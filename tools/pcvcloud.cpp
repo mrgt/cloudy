@@ -24,13 +24,12 @@ bool setup(cloudy::view::Viewer &w,
        std::ifstream fs(parameters[1].c_str());
        weights = Scalar_field_ptr(new std::vector<double>());
        cloudy::load_data<double>(fs, std::back_inserter(*weights));
-       std::cerr << "WEIGHTS SIZE" << weights->size() << std::endl;
-     }
 
-//    for (size_t i = 0; i < cloud->size(); ++i)
-//    {
-//       std::cerr << (*cloud)[i].size() << std::endl;
-//    }
+       for (size_t i = 0; i < weights->size(); ++i)
+	 {
+	   (*weights)[i] *= weights->size();
+	 }
+     }
    
    w.add_drawer(Drawer_ptr(new Cloud_drawer("cloud", cloud, weights)));
    return true;
