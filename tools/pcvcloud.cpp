@@ -8,7 +8,7 @@ bool setup(cloudy::view::Viewer &w,
 
    Data_cloud_ptr cloud (new Data_cloud());
 
-   if (parameters.size() != 1)
+   if (parameters.size() < 1)
    {
       std::cerr << "usage: pcvcloud file.cloud" << std::endl;
       return false;
@@ -18,11 +18,20 @@ bool setup(cloudy::view::Viewer &w,
    std::ifstream is(parameters[0].c_str());
    cloudy::load_cloud(is, *cloud);
 
+   Scalar_field_ptr weights;
+   if (parameters.size() == 2)
+     {
+       std::ifstream fs(parameters[1].c_str());
+       weights = Scalar_field_ptr(new std::vector<double>());
+       cloudy::load_data<double>(fs, std::back_inserter(*weights));
+       std::cerr << "WEIGHTS SIZE" << weights->size() << std::endl;
+     }
+
 //    for (size_t i = 0; i < cloud->size(); ++i)
 //    {
 //       std::cerr << (*cloud)[i].size() << std::endl;
 //    }
    
-   w.add_drawer(Drawer_ptr(new Cloud_drawer("cloud", cloud)));
+   w.add_drawer(Drawer_ptr(new Cloud_drawer("cloud", cloud, weights)));
    return true;
 }
