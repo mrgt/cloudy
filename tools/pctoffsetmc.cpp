@@ -99,7 +99,7 @@ Batch_integrate(const cloudy::KD_tree &kd, double R,
     {
       cloudy::uvector p_0 = four_to_three(kd[i]);
 
-      for (size_t j = 0; j < N; ++i)
+      for (size_t j = 0; j < N; ++j)
 	{
 	  cloudy::uvector p = three_to_four(p_0 + randball(engine));
 	  size_t k = kd.count_points_in_ball(p, R);
@@ -110,7 +110,10 @@ Batch_integrate(const cloudy::KD_tree &kd, double R,
       ++progress;
     }
   
-   std::cerr << "done in " << t.elapsed() << "s\n";
+  for (size_t i = 0; i < kd.size(); ++i)
+    os << ig.result(i) << std::endl;
+
+  std::cerr << "done in " << t.elapsed() << "s\n";
 }
 
 

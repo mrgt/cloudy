@@ -7,6 +7,7 @@
 #include <QSlider>
 #include <QCheckBox>
 #include <iostream>
+#include <math.h>
 
 namespace cloudy
 {
@@ -130,7 +131,6 @@ namespace cloudy
 	    void add_double(const std::string &name, double &ref,
 	                    double min = 0.0, double max = 1.0)
 	    {
-	       std::cerr << "add_double " << name << "\n";
 	       QObject *edit = new Editable_double(ref);
 	       _editables.push_back(edit);
 
@@ -153,9 +153,34 @@ namespace cloudy
 	       _current_row++;
 	    }
 
+	    void add_double_spin(const std::string &name, double &ref,
+				 double min = 0.0, double max = 1.0,
+				 int prec=3)
+	    {
+	       QObject *edit = new Editable_double(ref);
+	       _editables.push_back(edit);
+
+	       QLabel *label = new QLabel();
+	       label->setText(name.c_str());
+
+	       QDoubleSpinBox *box = new QDoubleSpinBox();
+
+	       box->setDecimals(prec);	      
+	       box->setRange(min,max);
+	       box->setSingleStep((max-min)/pow(10.0,prec));
+
+	       connect(box, SIGNAL(valueChanged(double)),
+	               edit, SLOT(set_value(double)));
+	       connect(box, SIGNAL(valueChanged(double)),
+	               this, SLOT(stateChangedSlot()));
+
+	       _layout->addWidget(label, _current_row, 0);
+	       _layout->addWidget(box, _current_row, 1);
+	       _current_row++;
+	    }
+
 	    void add_bool(const std::string &name, bool &ref)
 	    {
-	       std::cerr << "add_double " << name << "\n";
 	       QObject *edit = new Editable_bool(ref);
 	       _editables.push_back(edit);
 

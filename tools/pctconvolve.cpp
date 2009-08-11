@@ -21,10 +21,16 @@ void Process_all(double r,
     cloudy::Data_cloud field, convolved_field;
     cloudy::load_cloud(isField, field);
 
-    assert(field.size() == points.size());
+    if(field.size() != points.size())
+      {
+	std::cerr << "The two files should be of the same size\n";
+	return;
+      }
+
     if (points.size() == 0)
        return;
 
+    convolved_field.resize(field.size());
     size_t fieldsize = field[0].size();
     for (size_t i = 0; i < field.size(); ++i)
     {
@@ -34,7 +40,6 @@ void Process_all(double r,
 
     cloudy::KD_tree kd(points);
     cloudy::convolve_uniform<uvector>(kd, field, convolved_field, r);
-    std::cerr << kd.size() << " vs " << convolved_field.size();
 
     write_cloud(os, convolved_field);
 }
@@ -49,7 +54,7 @@ int main(int argc, char **argv)
 
    if (param.size() < 2)
    {
-      std::cerr << "Usage: " << argv[0] << " file.cloud file.p [outfile.p]"
+      std::cerr << "Usage: " << argv[0] << " file.cloud file.p [outfile.p -r radius]"
 		<< std::endl;
       return -1;
    }

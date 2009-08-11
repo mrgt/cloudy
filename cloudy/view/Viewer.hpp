@@ -143,6 +143,7 @@ namespace cloudy
          Data_cloud_ptr _cloud;
          Scalar_field_ptr _field;
 	 double _percentage;
+         double _radius;
 	 
       public:
 	 Cloud_drawer(const std::string &name,
@@ -151,7 +152,8 @@ namespace cloudy
 	    Drawer(name),
 	    _cloud(cloud),
 	    _field(field),
-	    _percentage(1.0)
+	    _percentage(1.0),
+	    _radius(1.0)
 	 {}
 
 	 virtual void draw(size_t stride)
@@ -178,7 +180,7 @@ namespace cloudy
 		  if (i % stride != 0)
 		     continue;
 
-		  glPointSize((*_field)[i]);
+		  glPointSize((*_field)[i]*_radius);
 		  glBegin(GL_POINTS);
 		  gl_uvertex(*it);
 		  glEnd();
@@ -191,6 +193,7 @@ namespace cloudy
 	 {
 	    Drawer::fill_editor(editor);
 	    editor->add_double("Percentage:", _percentage);
+	    editor->add_double_spin("Radius:", _radius, 0.0, 10.0);
 	 }
 	 
 	 virtual size_t stride()
