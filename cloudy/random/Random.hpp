@@ -1,6 +1,6 @@
 #ifndef CLOUDY_RANDOM_RANDOM_HPP
 
-#include <cloudy/Linear.hpp>
+#include <cloudy/linear/Linear.hpp>
 #include <boost/random/normal_distribution.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/uniform_int.hpp>

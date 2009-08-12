@@ -32,5 +32,14 @@ bool setup(cloudy::view::Viewer &w,
      }
    
    w.add_drawer(Drawer_ptr(new Cloud_drawer("cloud", cloud, weights)));
+
+   // temporary
+#if 0
+   cloudy::view::Mesh_ptr mesh (new cloudy::Mesh());
+   std::ifstream iso("sharp_sphere.off");
+   mesh->read_off(iso);
+
+   w.add_drawer(Drawer_ptr(new Mesh_drawer("fandisk.off", mesh)));
+#endif
    return true;
 }

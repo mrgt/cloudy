@@ -10,12 +10,18 @@ target_link_libraries(pctconvolve cloudy)
 add_executable(pctkdistance pctkdistance.cpp)
 target_link_libraries(pctkdistance cloudy)
 
+add_executable(pctoffcolorize offcolorize.cpp)
+target_link_libraries(pctoffcolorize cloudy)
+
 set(QT_USE_QTOPENGL 1)
 set(QT_USE_QTXML 1)
 include(${QT_USE_FILE})
 
 add_executable(pcvcloud pcvcloud.cpp)
 target_link_libraries(pcvcloud cloudy ${QT_LIBRARIES})
+
+add_executable(pcvmesh pcvmesh.cpp)
+target_link_libraries(pcvmesh cloudy ${QT_LIBRARIES})
 
 add_executable(pcvcovariance pcvcovariance.cpp)
 target_link_libraries(pcvcovariance cloudy ${QT_LIBRARIES})
