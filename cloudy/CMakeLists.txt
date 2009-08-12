@@ -7,9 +7,12 @@ set(QT_USE_QTXML 1)
 include(${QT_USE_FILE})
 
 set(cloudy_SRCS 
+  "Cloud.cpp"
   "linear/Linear.cpp"
   "linear/Covariance.cpp"
   "misc/Program_options.cpp"
+  "mesh/Mesh.cpp"
+  "mesh/Gradient.cpp"
   "view/Widget.cpp"
   "view/Director.cpp")
 set(cloudy_MOC_HDR

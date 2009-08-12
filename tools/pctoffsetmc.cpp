@@ -10,6 +10,12 @@
 
 ///////////////////////////////////////////////////////////////
 
+enum Integration_type
+  {
+    VOLUME,
+    CURVATURE,
+    COVARIANCE
+  };
 
 std::ostream &
 operator << (std::ostream &os, const cloudy::uvector &cov)
@@ -53,6 +59,55 @@ void Load_data(std::istream &is, cloudy::Data_cloud &points)
   for (size_t i = 0; i < points.size(); ++i)
       points[i] = three_to_four(points[i]);
 }
+
+#include "cumulative.hpp"
+
+class MC_curvature_measures_integrator
+{
+  const cloudy::KD_tree &_kd;
+  std::vector< std::vector<double> > _radii;
+  std::vector< std::vector<double> > _weights;
+  double _total_value;
+
+public:
+  MC_curvature_measures_integrator(const cloudy::KD_tree &kd): _kd(kd)
+  {
+    _radii.resize(kd.size());
+    _weights.resize(kd.size());
+    _total_value = 0.0;
+  }
+  void operator () (const cloudy::uvector &pos, double value)
+  {
+    size_t nn = _kd.find_nn(three_to_four(pos));
+    double rad = cloudy::ublas::norm_2(_kd[nn] - pos);
+
+    _radii[nn].push_back(rad);
+    _weights[nn].push_back(value);
+    _total_value += value;
+  }
+
+  cloudy::uvector result(size_t i)
+  {
+    assert(_total_value > 0);
+
+    if (_radii[i].size() < 3)
+	return cloudy::ublas::zero_vector<double>(3);
+    
+    std::vector<double> radii, values;
+    cumulative_function(_radii[i], _weights[i], 
+			radii, values);
+
+    for (size_t s = 0; s < _weights[i].size(); ++s)
+      values[s] /= _total_value;
+    
+    double c0, c1, c2;
+    linear_fit_quadratic(radii, values, c0, c1, c2);
+    cloudy::uvector res(3);
+    res[0] = c0; res[1] = c1; res[2] = c2;
+
+    return res;
+  }
+};
 
 class MC_volume_integrator
 {
@@ -110,29 +165,37 @@ Batch_integrate(const cloudy::KD_tree &kd, double R,
       ++progress;
     }
   
+  std::cerr << "Computing and writing\n";
+  cloudy::misc::Progress_display progress2(kd.size(), std::cerr);
   for (size_t i = 0; i < kd.size(); ++i)
-    os << ig.result(i) << std::endl;
+    {
+      os << ig.result(i) << std::endl;
+      ++progress;
+    }
 
   std::cerr << "done in " << t.elapsed() << "s\n";
 }
 
 
-void Process_all(std::istream &is,  std::ostream &os, bool covariance,
+void Process_all(std::istream &is,  std::ostream &os, 
+		 Integration_type type,
                  double R, size_t N)
 {
    cloudy::Data_cloud points;
    Load_data(is, points);   
    cloudy::KD_tree kd(points);
 
-   if (covariance == false)
-   {
-      Batch_integrate<MC_volume_integrator>
-	(kd, R, N, os);
-   }
-   else
-   {
-     std::cerr << "Covariance unimplemented\n";
-   }
+   std::cerr << "type = " << type << "\n";
+   switch (type)
+     {
+     case VOLUME:
+       std::cerr << "type = " << type << "\n";
+       Batch_integrate<MC_volume_integrator> (kd, R, N, os);
+       break;
+     case CURVATURE:
+       Batch_integrate<MC_curvature_measures_integrator> (kd, R, N, os);
+       break;
+     }
 }
 
 int main(int argc, char **argv)
@@ -141,21 +204,26 @@ int main(int argc, char **argv)
    std::vector<std::string> param;
    cloudy::misc::get_options (argc, argv, options, param);
 
-   bool covariance = (options["type"] == "covariance");
+   Integration_type type = VOLUME;
+   if (options["type"] == "covariance")
+     type = COVARIANCE;
+   else if (options["type"] == "curvature")
+     type = CURVATURE;
+     
    double R = cloudy::misc::to_double(options["R"], 0.1);
    size_t N = cloudy::misc::to_unsigned(options["N"], 100);
 
    if (param.size() == 1)
    {
       std::ifstream is(param[0].c_str());
-      Process_all(is, std::cout, covariance, R, N);
+      Process_all(is, std::cout, type, R, N);
    }
    else if (param.size() == 2)
    {
       std::ifstream is(param[0].c_str());
       std::ofstream os(param[1].c_str());
-      Process_all(is, os, covariance, R, N);
+      Process_all(is, os, type, R, N);
    }
    else
-      Process_all(std::cin, std::cout, covariance, R, N);
+      Process_all(std::cin, std::cout, type, R, N);
 }

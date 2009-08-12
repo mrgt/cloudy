@@ -49,6 +49,50 @@ namespace cloudy
 	 }
    };
 
+  template <class Type, class Function>
+  class Convolution_functor
+  {
+    const KD_tree &_kd;
+    const std::vector<Type> &_field;
+    const Function &_f;
+
+  public:
+    Convolution_functor(const KD_tree &kd,
+			const std::vector<Type> &input,
+			const Function &f):  _kd(kd),
+					     _field(input),
+					     _f(f)
+    {}
+
+    Type operator() (const uvector &position) const
+    {
+      std::vector<size_t> indices;
+      
+      _kd.find_points_in_ball(position, _f.support_radius(),
+			      indices);
+      
+      Type res = _field[indices[0]];
+      for (size_t j = 1; j < indices.size(); ++j)
+	res += _f(_kd[indices[j]]) * _field[indices[j]];      
+      return res;
+    }
+  };
+
+  template<class Type>
+  class Convolution_uniform_functor:
+    public Convolution_functor<Type, Uniform_function>
+  {
+    Uniform_function _realf;
+  public:
+    Convolution_uniform_functor(const KD_tree &kd,
+				const std::vector<Type> &input,
+				double r):
+      Convolution_functor<Type, Uniform_function>(kd, input, _realf),
+      _realf(r)
+    {
+    }
+  };
+
    template <class Type, class Function> 
    void convolve(const KD_tree &kd,
 		 const std::vector<Type> &input,

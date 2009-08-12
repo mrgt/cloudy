@@ -91,7 +91,11 @@ namespace cloudy
       yold=y;
 
       if(need_redisplay)
-	 updateGL();
+	{
+	  fast_draw = true;
+	  updateGL();
+	  fast_draw = false;
+	}
    }
 
    void GL_widget::mousePressEvent(QMouseEvent* e)
@@ -99,8 +103,12 @@ namespace cloudy
      //std::cout << "Old Mouse Press" << std::endl;
       xold = e->pos().x();
       yold = e->pos().y();
-
    }
+
+     void GL_widget:: mouseReleaseEvent(QMouseEvent* e)
+     {
+       	 updateGL();
+     }
 
    void GL_widget::wheelEvent (QWheelEvent* e)
    {

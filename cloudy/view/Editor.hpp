@@ -90,6 +90,24 @@ namespace cloudy
       };
 
 
+      class Editable_integer: public QObject
+      {
+	    Q_OBJECT;
+	    int &_value;
+
+	 public:
+	    Editable_integer(int &value):
+	       _value(value)
+	    {}
+
+	 public slots:
+	    void set_value(int v)
+	    {
+	       _value = v;
+	    }
+      };
+
+
       class Editable_bool: public QObject
       {
 	    Q_OBJECT;
@@ -165,6 +183,7 @@ namespace cloudy
 
 	       QDoubleSpinBox *box = new QDoubleSpinBox();
 
+	       box->setValue(ref);
 	       box->setDecimals(prec);	      
 	       box->setRange(min,max);
 	       box->setSingleStep((max-min)/pow(10.0,prec));
@@ -172,6 +191,31 @@ namespace cloudy
 	       connect(box, SIGNAL(valueChanged(double)),
 	               edit, SLOT(set_value(double)));
 	       connect(box, SIGNAL(valueChanged(double)),
+	               this, SLOT(stateChangedSlot()));
+
+	       _layout->addWidget(label, _current_row, 0);
+	       _layout->addWidget(box, _current_row, 1);
+	       _current_row++;
+	    }
+
+
+	    void add_integer_spin(const std::string &name, int &ref,
+				  int min, int max)
+	    {
+	       QObject *edit = new Editable_integer(ref);
+	       _editables.push_back(edit);
+
+	       QLabel *label = new QLabel();
+	       label->setText(name.c_str());
+
+	       QSpinBox *box = new QSpinBox();
+	       box->setRange(min,max);
+	       box->setSingleStep(1);
+	       box->setValue(ref);
+
+	       connect(box, SIGNAL(valueChanged(int)),
+	               edit, SLOT(set_value(int)));
+	       connect(box, SIGNAL(valueChanged(int)),
 	               this, SLOT(stateChangedSlot()));
 
 	       _layout->addWidget(label, _current_row, 0);

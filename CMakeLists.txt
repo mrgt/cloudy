@@ -5,11 +5,14 @@ set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS true)
 if (COMMAND cmake_policy)
   cmake_policy(SET CMP0003 NEW)
 endif()
- 
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/modules)
+
 find_package(CGAL QUIET COMPONENTS Core)
 find_package(PythonLibs REQUIRED)
 find_package(Boost COMPONENTS python REQUIRED)
 find_package(Qt4 REQUIRED)
+find_package(GSL REQUIRED)
 
 set(QT_USE_QTOPENGL 1)
 include(${CGAL_USE_FILE})
@@ -23,6 +26,7 @@ link_directories(${CMAKEDEMO_BINARY_DIR}/cloudy)
 link_directories(${CMAKEDEMO_BINARY_DIR}/dependencies/ANN)
 link_libraries(${PYTHON_LIBRARIES})
 link_libraries(${Boost_LIBRARIES})
+link_libraries(gsl) #${GSL_LIBRARIES})
 link_libraries(lapack)
 
 add_subdirectory(dependencies)

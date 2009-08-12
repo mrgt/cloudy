@@ -39,6 +39,7 @@ namespace cloudy
 	    
 	    void mouseMoveEvent (QMouseEvent* e);
 	    void mousePressEvent (QMouseEvent* e);
+	    void mouseReleaseEvent (QMouseEvent* e);
 	    void wheelEvent (QWheelEvent* e);
 	    
 	    void keyPressEvent (QKeyEvent* e);
@@ -56,8 +57,10 @@ namespace cloudy
 	    int pushedL, pushedR, pushedM;
 	    bool shifting;
 	    double rayon;
+	
 	 public:
 	    Director b;
+	    bool fast_draw;
    };
 }
 }

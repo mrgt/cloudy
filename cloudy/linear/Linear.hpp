@@ -10,6 +10,8 @@ namespace cloudy
    
    typedef ublas::vector<double> uvector;
    typedef ublas::matrix<double, ublas::row_major> umatrix;	
+
+   extern uvector cross_prod(uvector X, uvector Y);
    
    namespace linear{
 
