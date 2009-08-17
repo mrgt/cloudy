@@ -79,6 +79,21 @@ namespace cloudy
   };
 
   template<class Type>
+  class Convolution_tent_functor:
+    public Convolution_functor<Type, Tent_function>
+  {
+    Tent_function _realf;
+  public:
+    Convolution_tent_functor(const KD_tree &kd,
+				const std::vector<Type> &input,
+				double r):
+      Convolution_functor<Type, Tent_function>(kd, input, _realf),
+      _realf(r)
+    {
+    }
+  };
+
+  template<class Type>
   class Convolution_uniform_functor:
     public Convolution_functor<Type, Uniform_function>
   {

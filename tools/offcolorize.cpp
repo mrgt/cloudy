@@ -17,7 +17,8 @@ void Process_all(std::istream &isCloud,
                  std::istream &isOff, 
                  std::ostream &os,
 		 double r,
-		 size_t comp = 0)
+		 size_t comp = 0,
+		 double tmax = -1.0)
 {
     cloudy::Data_cloud points;
     cloudy::load_cloud(isCloud, points);
@@ -45,7 +46,12 @@ void Process_all(std::istream &isCloud,
        return;
 
     cloudy::KD_tree kd(points);
-    cloudy::Convolution_uniform_functor<double> f(kd, field, r);
+    cloudy::Convolution_tent_functor<double> f(kd, field, r);
+    //cloudy::Convolution_uniform_functor<double> f(kd, field, r);
+
+    if (tmax > 0.0)
+      mesh.simple_tesselate(tmax);
+
     mesh.simple_colorize(f, ggr, true);
     mesh.write_off(os);
 }
@@ -57,12 +63,13 @@ int main(int argc, char **argv)
    cloudy::misc::get_options (argc, argv, options, param);
 
    double r = cloudy::misc::to_double(options["r"], 0.05);
+   double tmax = cloudy::misc::to_double(options["tmax"], -1);
    size_t comp = cloudy::misc::to_int(options["comp"], 0);
    
 
    if (param.size() < 2)
    {
-      std::cerr << "Usage: " << argv[0] << " file.cloud file.p file.ggr file.off [outfile.off -r radius -comp component]"
+      std::cerr << "Usage: " << argv[0] << " file.cloud file.p file.ggr file.off [outfile.off -r radius -comp component -tmax triangle max size]"
 		<< std::endl;
       return -1;
    }
@@ -75,8 +82,8 @@ int main(int argc, char **argv)
    if (param.size() == 5)
    {
       std::ofstream os(param[3].c_str());
-      Process_all(isCloud, isField, isGradient, isOff, os, r, comp);
+      Process_all(isCloud, isField, isGradient, isOff, os, r, comp, tmax);
    }
    else
-     Process_all(isCloud, isField, isGradient, isOff, std::cout, r, comp);
+     Process_all(isCloud, isField, isGradient, isOff, std::cout, r, comp, tmax);
 }

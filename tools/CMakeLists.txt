@@ -13,6 +13,12 @@ target_link_libraries(pctkdistance cloudy)
 add_executable(pctoffcolorize offcolorize.cpp)
 target_link_libraries(pctoffcolorize cloudy)
 
+add_executable(pctoffextract pctextract.cpp)
+target_link_libraries(pctoffextract cloudy)
+
+add_executable(pctoffnormalize pctoffnormalize.cpp)
+target_link_libraries(pctoffnormalize cloudy)
+
 set(QT_USE_QTOPENGL 1)
 set(QT_USE_QTXML 1)
 include(${QT_USE_FILE})
