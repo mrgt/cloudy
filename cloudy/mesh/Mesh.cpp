@@ -1,6 +1,7 @@
 #include <cloudy/mesh/Mesh.hpp>
 #include <cloudy/random/Random.hpp>
 #include <string>
+#include <list>
 #include <sstream>
 
 namespace cloudy
@@ -70,7 +71,7 @@ namespace cloudy
 	 
 	 for (size_t j = 0; j < n-2; ++j)
 	 {
-	    Mesh_triangle t = {v[0], v[j+1], v[j+2]};
+	   Mesh_triangle t (v[0], v[j+1], v[j+2]);
 	    _triangles.push_back(t);
 	 }
       }
@@ -165,5 +166,62 @@ namespace cloudy
 	 for (size_t j = 0; j < Nt; ++j)
 	    cl.push_back(R(rng));
       }
+   }
+
+
+  static
+  double max_length(const uvector &a, const uvector &b, 
+		    const uvector &c)
+  {
+    return std::max(std::max(ublas::norm_2(b-a),
+			     ublas::norm_2(c-a)),
+		    ublas::norm_2(c-b));
+  }
+
+  size_t
+  Mesh::insert_midpoint(size_t a, size_t b)
+  {
+    size_t r = _points.size();
+
+    _points.push_back(0.5*(_points[a] + _points[b]));
+    
+    if (_flags & MESH_NORMAL)
+      _normals.push_back(0.5*(_normals[a] + _normals[b]));
+
+    if (_flags & MESH_COLOR)
+      _colors.push_back(0.5*(_colors[a] + _colors[b]));
+
+    return r;
+  }
+
+
+   void
+   Mesh::simple_tesselate(double maxr)
+   {
+     std::list<Mesh_triangle> queue;
+     for (size_t i = 0; i < _triangles.size(); ++i)
+       queue.push_back(_triangles[i]);
+     
+     _triangles.clear();
+     while(!queue.empty())
+       {
+	 Mesh_triangle t = queue.front(); queue.pop_front();
+	 double l = max_length(_points[t.a], _points[t.b], _points[t.c]);
+
+	 if (l < maxr)
+	   {
+	     _triangles.push_back(t);
+	     continue;
+	   }
+
+	 size_t A = insert_midpoint(t.a, t.b);
+	 size_t B = insert_midpoint(t.b, t.c);
+	 size_t C = insert_midpoint(t.c, t.a);
+
+	 queue.push_back(Mesh_triangle(t.a, A, C));
+	 queue.push_back(Mesh_triangle(A, t.b, B));
+	 queue.push_back(Mesh_triangle(C, B, t.c));
+	 queue.push_back(Mesh_triangle(A, B, C));
+       }
    }
 }

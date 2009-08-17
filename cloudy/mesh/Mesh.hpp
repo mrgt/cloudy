@@ -7,7 +7,12 @@
 
 namespace cloudy
 {
-   struct Mesh_triangle {size_t a,b,c;};
+   struct Mesh_triangle
+   {
+     size_t a,b,c;
+   public:
+     Mesh_triangle(size_t aa, size_t bb, size_t cc): a(aa), b(bb), c(cc) {}
+   };
 
    enum
    {
@@ -24,6 +29,8 @@ namespace cloudy
 	 std::vector<Color> _colors;
 	 std::vector<Mesh_triangle> _triangles;
 	 size_t _flags;
+
+         size_t insert_midpoint(size_t a, size_t b);
 	 
       public:
 	 void read_off (std::istream &is);
@@ -112,10 +119,12 @@ namespace cloudy
 	    }
 	 }
 
-// 	 void normalize ()
-// 	 {
-// 	    cloudy::normalize_cloud(_points);
-// 	 }
+         void simple_tesselate(double maxr);
+
+ 	 void normalize (double radius)
+ 	 {
+	    cloudy::normalize(_points, radius);
+ 	 }
    };
 }
 

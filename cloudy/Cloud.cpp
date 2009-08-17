@@ -40,4 +40,49 @@ namespace cloudy
    {
       cloudy::write_data(os, c.begin(), c.end());
    }
+
+  uvector mean (const Data_cloud &dc)
+  {
+    if (dc.size() == 0)
+      return uvector();
+
+    uvector m = dc[0];
+    for (size_t i = 0; i < dc.size(); ++i)
+      m += dc[i];
+
+    return (1.0/double(dc.size())) * m;
+  }
+
+  double simple_radius(const Data_cloud &dc)
+  {
+    if (dc.size() == 0)
+      return 0.0;
+    
+    double r = ublas::norm_2(dc[0]);
+    
+    for (size_t i = 0; i < dc.size(); ++i)
+      r = std::max(r, ublas::norm_2(dc[i]));
+
+    return r;
+  }
+  
+  void translate(Data_cloud &dc, const uvector &u)
+  {
+    uvector m = mean(dc);
+    for (size_t i = 0; i < dc.size(); ++i)
+      dc[i] +=  u;
+  }
+
+  void scale(Data_cloud &dc, double r)
+  {
+    uvector m = mean(dc);
+    for (size_t i = 0; i < dc.size(); ++i)
+      dc[i] *= r;
+  }
+
+  void normalize(Data_cloud &c, double rad)
+  {
+    translate(c, - mean(c));
+    scale(c, rad/simple_radius(c));
+  }
 }

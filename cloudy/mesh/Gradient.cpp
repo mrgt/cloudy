@@ -46,6 +46,15 @@ namespace cloudy
 	      >> c._end_color._b
 	      >> ea;
 	 from >> blend >> type;
+
+	 
+	 std::cerr << "Gradient Begin " << 
+	   c._start << " End " <<  c._end  
+		   << " SC " <<  c._start_color._r << " " <<
+	   c._start_color._g << " " << c._start_color._b
+		   <<  " EC " <<  c._end_color._r << " " <<
+	   c._end_color._g << " " <<  c._end_color._b
+		   << "\n";
 	 
 	 _gradient_colors.push_back(c);
       }

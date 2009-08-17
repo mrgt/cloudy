@@ -46,6 +46,13 @@ namespace cloudy
 
    void load_cloud(std::istream &is, Data_cloud &c);
    void write_cloud(std::ostream &os, Data_cloud &c);
+
+  uvector mean (const Data_cloud &dc);
+  double simple_radius(const Data_cloud &dc);
+  void translate(Data_cloud &dc, const uvector &u);
+  void scale(Data_cloud &dc, double r);
+  void normalize(Data_cloud &c, double rad = 1.0);
+  
 }
 
 #endif
