@@ -2,6 +2,8 @@
 #define MESH_HPP
 
 #include <istream>
+
+#include <cloudy/misc/Progress.hpp>
 #include <cloudy/Cloud.hpp>
 #include <cloudy/mesh/Gradient.hpp>
 
@@ -88,6 +90,9 @@ namespace cloudy
 	 {
 	    std::vector<double> values(_points.size());
 	    double minval(0), maxval(0);
+	    
+	    std::cerr << "Colorizing ... \n";
+	    cloudy::misc::Progress_display progress(_points.size(), std::cerr);
 
 	    for (size_t i = 0; i < _points.size(); ++i)
 	    { 
@@ -116,6 +121,7 @@ namespace cloudy
 	    {
 	       double t = (values[i] - minval) / (maxval - minval);
 	       _colors[i] = g(t);
+	       ++progress;
 	    }
 	 }
 
