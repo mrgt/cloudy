@@ -20,19 +20,23 @@ void Process_all(std::istream &isCloud,
 		 size_t comp = 0,
 		 double tmax = -1.0)
 {
+  std::cerr << "loading cloud\n";
     cloudy::Data_cloud points;
     cloudy::load_cloud(isCloud, points);
 
+  std::cerr << "loading field\n";
     cloudy::Data_cloud ifield;
     cloudy::load_cloud(isField, ifield);
-
+    
     std::vector<double> field;
     for (size_t i = 0; i < ifield.size(); ++i)
       field.push_back(ifield[i][comp]);
 
+  std::cerr << "loading OFF\n";
     cloudy::Mesh mesh;
     mesh.read_off(isOff);
 
+    std::cerr << "loading gradient\n";
     cloudy::Gradient ggr;
     ggr.read_ggr(isGradient);
 
@@ -81,7 +85,8 @@ int main(int argc, char **argv)
    
    if (param.size() == 5)
    {
-      std::ofstream os(param[3].c_str());
+     std::cerr << "outputing in " << param[4] << "\n";
+      std::ofstream os(param[4].c_str());
       Process_all(isCloud, isField, isGradient, isOff, os, r, comp, tmax);
    }
    else
