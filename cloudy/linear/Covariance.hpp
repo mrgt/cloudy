@@ -9,6 +9,7 @@ namespace cloudy
    namespace linear
    {
       umatrix matrix_from_covariance_3(const uvector v);
+
       bool
       covariance_extract_eigen(const umatrix &m, 
                                std::vector<double> &eig,

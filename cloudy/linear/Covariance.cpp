@@ -1,10 +1,12 @@
 #include <cloudy/linear/Covariance.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
+#include <CGAL/linear_least_squares_fitting_3.h>
 
 namespace cloudy
 {
    namespace linear
    {
+#if USE_LAPACK
       bool
       covariance_extract_eigen(const umatrix &m, 
                                std::vector<double> &eig,
@@ -24,6 +26,48 @@ namespace cloudy
 	    directions[i] = ublas::row(M,i);
 	 return true;
       }
+
+#else
+      bool
+      covariance_extract_eigen(const umatrix &m, 
+			       std::vector<double> &eig,
+			       Data_cloud &directions)
+      {
+	size_t dim = m.size1();
+	size_t nentries = dim*(dim+1)/2;
+
+	double *M = new double(nentries);
+	size_t cur = 0;
+
+	for (size_t i = 0; i < dim; ++i)
+	  {
+	    for (size_t j = i; j < dim; ++j)
+	      {
+		M[cur] = m(i,j);
+		cur++;
+	      }
+	  }
+	
+	double *eigen_vectors = new double(dim*dim);
+	double *eigen_values = new double(dim);
+
+	CGAL::CGALi::eigen_symmetric<double>
+	  (M, dim, eigen_vectors, eigen_values);
+
+	for (size_t i = 0; i < dim; ++i)
+	  {
+	    uvector v(dim);
+	    for (size_t j = 0; j < dim; ++j)
+	      v[j] = eigen_vectors[dim*i+j];
+	    directions.push_back(v);
+	    eig.push_back(eigen_values[i]);
+	  }
+	delete M;
+	delete eigen_vectors; 
+	delete eigen_values;
+      }
+#endif
+
 
       umatrix matrix_from_covariance_3(const uvector v)
       {
