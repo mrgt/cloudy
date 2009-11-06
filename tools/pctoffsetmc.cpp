@@ -60,6 +60,8 @@ void Load_data(std::istream &is, cloudy::Data_cloud &points)
       points[i] = three_to_four(points[i]);
 }
 
+#ifdef OFF_CURVATURE
+
 #include "cumulative.hpp"
 
 class MC_curvature_measures_integrator
@@ -108,6 +110,8 @@ public:
     return res;
   }
 };
+
+#endif
 
 class MC_volume_integrator
 {
@@ -192,9 +196,12 @@ void Process_all(std::istream &is,  std::ostream &os,
        std::cerr << "type = " << type << "\n";
        Batch_integrate<MC_volume_integrator> (kd, R, N, os);
        break;
+
+#ifdef OFF_CURVATURE
      case CURVATURE:
        Batch_integrate<MC_curvature_measures_integrator> (kd, R, N, os);
        break;
+#endif
      }
 }
 
