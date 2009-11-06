@@ -19,7 +19,7 @@ bool setup(cloudy::view::Viewer &w,
    cloudy::load_cloud(is, *cloud);
 
    Scalar_field_ptr weights;
-   if (parameters.size() == 2)
+   if (parameters.size() >= 2)
      {
        std::ifstream fs(parameters[1].c_str());
        weights = Scalar_field_ptr(new std::vector<double>());
@@ -34,12 +34,14 @@ bool setup(cloudy::view::Viewer &w,
    w.add_drawer(Drawer_ptr(new Cloud_drawer("cloud", cloud, weights)));
 
    // temporary
-#if 0
-   cloudy::view::Mesh_ptr mesh (new cloudy::Mesh());
-   std::ifstream iso("sharp_sphere.off");
-   mesh->read_off(iso);
 
-   w.add_drawer(Drawer_ptr(new Mesh_drawer("fandisk.off", mesh)));
-#endif
-   return true;
+   if (parameters.size() == 3)
+     {
+       std::string meshname = parameters[2];
+       cloudy::view::Mesh_ptr mesh (new cloudy::Mesh());
+       std::ifstream iso(meshname.c_str());
+       mesh->read_off(iso);
+       
+       w.add_drawer(Drawer_ptr(new Mesh_drawer(meshname, mesh)));
+     }
 }

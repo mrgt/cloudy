@@ -155,6 +155,7 @@ namespace cloudy
          double _radius;
          bool _spheres;
          int _sphere_tessel;
+         double _low_threshold;
 	 
       public:
 	 Cloud_drawer(const std::string &name,
@@ -166,7 +167,8 @@ namespace cloudy
 	    _percentage(1.0),
 	    _radius(1.0),
 	    _spheres(false),
-	    _sphere_tessel(8)
+	    _sphere_tessel(8),
+	    _low_threshold(0.0)
 	 {}
 
          virtual void draw(size_t stride, bool fast)
@@ -193,12 +195,12 @@ namespace cloudy
 		{
 		  double rr = (*_field)[i]*_radius/1000.0f;
 
-		  if (rr <= 0.001)
+		  if ((*_field)[i] < _low_threshold)
 		    continue;
 
 		  size_t div = _sphere_tessel;
 		  if (rr >= 0.1)
-		    div = 16;
+		    div *= 4;
 
 		  glPushMatrix();
 		  glTranslatef((*it)[0], (*it)[1], (*it)[2]);
@@ -216,7 +218,7 @@ namespace cloudy
 	       for (Data_cloud::iterator it = _cloud->begin();
 		    it != _cloud->end(); ++it, ++i)
 	       {
-		  if (i % stride != 0)
+		 if (i % stride != 0 || (*_field)[i] < _low_threshold)
 		     continue;
 
 		  glPointSize((*_field)[i]*_radius);
@@ -235,6 +237,19 @@ namespace cloudy
 	    editor->add_double_spin("Radius:", _radius, 0.0, 10.0);
 	    editor->add_bool("Spheres?", _spheres);
 	    editor->add_integer_spin("Tesselation", _sphere_tessel, 0, 16);
+
+	    
+	    if ((!_field) || (_field->size() == 0))
+	      return;
+
+	    double max = (*_field)[0], min = (*_field)[0];
+	    for (size_t i = 1; i < (*_field).size(); ++i)
+	      {
+		max = std::max(max, (*_field)[i]);
+		min = std::min(min, (*_field)[i]);
+	      }
+	    _low_threshold = min;
+	    editor->add_double_spin("Low threshold:", _low_threshold, min, max);
 	 }
 	 
 	 virtual size_t stride()
