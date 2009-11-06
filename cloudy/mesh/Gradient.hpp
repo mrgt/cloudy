@@ -3,6 +3,7 @@
 
 #include <istream>
 #include <vector>
+#include <string>
 
 namespace cloudy
 {
