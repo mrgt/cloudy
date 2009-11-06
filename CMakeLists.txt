@@ -27,7 +27,7 @@ link_directories(${CMAKEDEMO_BINARY_DIR}/dependencies/ANN)
 #link_libraries(${PYTHON_LIBRARIES})
 link_libraries(${Boost_LIBRARIES})
 #link_libraries(gsl) #${GSL_LIBRARIES})
-link_libraries(lapack)
+#link_libraries(lapack)
 
 add_subdirectory(dependencies)
 add_subdirectory(cloudy)
