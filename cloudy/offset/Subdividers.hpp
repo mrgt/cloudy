@@ -174,7 +174,7 @@ namespace cloudy {
 	template <class Integrator>
 	void split_intersecting_triangle
 	   (Integrator &ig,
-	    double a_inside,
+	    bool a_inside,
 	    const typename Integrator::Vector &a,
 	    const typename Integrator::Vector &b,
 	    const typename Integrator::Vector &c)
