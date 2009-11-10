@@ -64,7 +64,7 @@ namespace cloudy { namespace offset {
 	       _functor(a,b,c);
 	    }
       };
-
+#if 0
       template <class Subdivider, class RT, class Functor>
       void
       boundary_triangles(const RT&rt, 
@@ -94,7 +94,10 @@ namespace cloudy { namespace offset {
 	 Tetrahedra_integrator<K, Functor> ig(v->point(), ft);
 	 aggregate(rt, v, sub, ig);
       }
+#endif
+
    }
+
 }
 
 #endif

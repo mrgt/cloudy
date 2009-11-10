@@ -32,6 +32,15 @@ void Build_regular_triangulation(std::istream &is, RT &rt,
    cloudy::misc::Progress_display progress(points.size(), std::cerr);
    boost::timer t;
 
+   Vertex_handle b[8] = {rt.insert(Weighted_point(Point(mx, my, mz), 0.0)),
+                         rt.insert(Weighted_point(Point(mx, my, Mz), 0.0)),
+			 rt.insert(Weighted_point(Point(mx, My, mz), 0.0)),
+			 rt.insert(Weighted_point(Point(mx, My, Mz), 0.0)),
+			 rt.insert(Weighted_point(Point(Mx, my, mz), 0.0)),
+			 rt.insert(Weighted_point(Point(Mx, my, Mz), 0.0)),
+			 rt.insert(Weighted_point(Point(Mx, My, mz), 0.0)),
+			 rt.insert(Weighted_point(Point(Mx, My, Mz), 0.0))};
+
    for (size_t i = 0; i < points.size(); ++i)
    {
       cloudy::uvector v = points[i];
@@ -49,16 +58,6 @@ void Build_regular_triangulation(std::istream &is, RT &rt,
       *vertex_handles++ = rt.insert(wp);
       progress++;
    }
-
-   Vertex_handle b[8] = {rt.insert(Weighted_point(Point(mx, my, mz), 0.0)),
-                         rt.insert(Weighted_point(Point(mx, my, Mz), 0.0)),
-			 rt.insert(Weighted_point(Point(mx, My, mz), 0.0)),
-			 rt.insert(Weighted_point(Point(mx, My, Mz), 0.0)),
-			 rt.insert(Weighted_point(Point(Mx, my, mz), 0.0)),
-			 rt.insert(Weighted_point(Point(Mx, my, Mz), 0.0)),
-			 rt.insert(Weighted_point(Point(Mx, My, mz), 0.0)),
-			 rt.insert(Weighted_point(Point(Mx, My, Mz), 0.0))};
-
 
    std::cerr << "done in " << t.elapsed() << "s\n";
 }
@@ -97,15 +96,22 @@ Batch_integrate(const RT &rt, Iterator begin, Iterator end,
       typename Integrator::Result_type res =
 	 cloudy::offset::integrate<Subdivider, Integrator> (rt, *begin, R);
       os << res << "\n";
-      //++progress;
-      std::cerr << i << "\n"; ++i;
+      ++progress;
+      //std::cerr << i << "\n"; ++i;
    }
 
    std::cerr << "done in " << t.elapsed() << "s\n";
 }
 
+enum IntegrationType 
+  {
+    INTEGRATION_COVARIANCE, 
+    INTEGRATION_VOLUME,
+    INTEGRATION_MESH
+  };
 
-void Process_all(std::istream &is,  std::ostream &os, bool covariance,
+void Process_all(std::istream &is,  std::ostream &os, 
+		 IntegrationType type,
                  double R, int cell)
 {
    typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
@@ -121,14 +127,19 @@ void Process_all(std::istream &is,  std::ostream &os, bool covariance,
    
    Build_regular_triangulation(is, rt, std::back_inserter(vertices));
 
-   if (covariance == false)
+   if (type == INTEGRATION_COVARIANCE)
    {
-      Batch_integrate< Clamp_subdivider, Volume_integrator<K> >
+      Batch_integrate< Clamp_subdivider, Covariance_integrator<K> >
 	 (rt, vertices.begin(), vertices.end(), R, cell, os);
+   }
+   else if (type == INTEGRATION_MESH)
+   {
+     Batch_integrate< Tesselate_subdivider, Mesh_integrator<K> >
+       (rt, vertices.begin(), vertices.end(), R, cell, os);
    }
    else
    {
-      Batch_integrate< Clamp_subdivider, Covariance_integrator<K> >
+      Batch_integrate< Clamp_subdivider, Volume_integrator<K> >
 	 (rt, vertices.begin(), vertices.end(), R, cell, os);
    }
 
@@ -140,21 +151,26 @@ int main(int argc, char **argv)
    std::vector<std::string> param;
    cloudy::misc::get_options (argc, argv, options, param);
 
-   bool covariance = (options["type"] == "covariance");
+   IntegrationType type = INTEGRATION_VOLUME;
+   if (options["type"] == "covariance")
+     type = INTEGRATION_COVARIANCE;
+   else if (options["type"] == "mesh")
+     type = INTEGRATION_MESH;
+
    double R = cloudy::misc::to_double(options["R"], 0.1);
    int cell = cloudy::misc::to_int(options["N"], -1);
 
    if (param.size() == 1)
    {
       std::ifstream is(param[0].c_str());
-      Process_all(is, std::cout, covariance, R, cell);
+      Process_all(is, std::cout, type, R, cell);
    }
    else if (param.size() == 2)
    {
       std::ifstream is(param[0].c_str());
       std::ofstream os(param[1].c_str());
-      Process_all(is, os, covariance, R, cell);
+      Process_all(is, os, type, R, cell);
    }
    else
-      Process_all(std::cin, std::cout, covariance, R, cell);
+      Process_all(std::cin, std::cout, type, R, cell);
 }

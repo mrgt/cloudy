@@ -106,4 +106,8 @@ namespace cloudy
 
       return (1.0 - l) * c._start_color + l * c._end_color;
    };
+
+   const Color Red(1.0, 0.0, 0.0), Green(0.0, 1.0, 0.0),
+     Blue(0.0, 0.0, 1.0), Black(0.0, 0.0, 0.0),
+     Yellow(1.0, 1.0, 0.0), Purple(1.0, 0.0, 1.0);
 }

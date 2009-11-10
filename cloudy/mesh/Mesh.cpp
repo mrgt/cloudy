@@ -77,7 +77,7 @@ namespace cloudy
       }
    }
 
-   void Mesh::write_off (std::ostream &os)
+   void Mesh::write_off (std::ostream &os) const
    {
       if (_flags & MESH_COLOR)
 	 os << "C";

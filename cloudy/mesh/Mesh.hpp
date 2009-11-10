@@ -1,7 +1,7 @@
 #ifndef MESH_HPP
 #define MESH_HPP
 
-#include <istream>
+#include <iostream>
 
 #include <cloudy/misc/Progress.hpp>
 #include <cloudy/Cloud.hpp>
@@ -36,7 +36,7 @@ namespace cloudy
 	 
       public:
 	 void read_off (std::istream &is);
-	 void write_off (std::ostream &os);
+	 void write_off (std::ostream &os) const;
 	 
 	 void clear()
 	 {
@@ -131,7 +131,24 @@ namespace cloudy
  	 {
 	    cloudy::normalize(_points, radius);
  	 }
+
+         void append_triangle (const uvector &a, 
+			       const uvector &b, 
+			       const uvector &c)
+         {
+	   size_t ida = insert_point(a);
+	   size_t idb = insert_point(b);
+	   size_t idc = insert_point(c);
+	   _triangles.push_back(Mesh_triangle(ida, idb, idc));
+         }
    };
+
+  std::ostream &
+  operator << (std::ostream &os, const Mesh &mesh)
+  {
+    mesh.write_off(os);
+    return os;
+  }
 }
 
 #endif

@@ -17,7 +17,67 @@ double squared_norm(const uvector &u)
    return pow(ublas::norm_2(u), 2.0);
 }
 
-void Process_all(size_t k,
+static const double EPSILON = 1e-6;
+
+double
+k_distance(size_t k, double m, double D,
+           const cloudy::KD_tree &kd, 
+           const std::vector<double> &W,
+           const cloudy::uvector &P,
+           cloudy::uvector &bary)
+{        
+   double totalw = 0.0;
+   double h = 0.0;
+   
+   while(totalw < m - EPSILON)
+   {
+      std::vector<size_t> knn;   
+      kd.find_knn(P, k, knn);
+      bary = W[knn[0]]*kd[knn[0]];
+      
+      size_t j = 0;
+      h = 0; totalw = 0;
+      for (; j < k; ++j)
+      {
+	 double w = W[knn[j]];
+	 
+	 if (totalw + w >= m - EPSILON)
+	    w = m - totalw;
+	 
+	 if (j == 1)
+	    bary = w*kd[knn[j]];
+	 else
+	    bary += w*kd[knn[j]];
+	 h += w*squared_norm(kd[knn[j]] - P);
+	 totalw += w;
+	 //std::cerr << w << "\t" <<  squared_norm(kd[knn[j]] - P) 
+	 //<< "\t" << h << "\n"; 
+	 //std::cerr << ublas::norm_2(kd[knn[j]] - P) << "\n";
+	 
+	 if (totalw >= m - EPSILON)
+	    break;
+      }
+
+      h /= totalw;
+      bary /= totalw;
+
+      // std::cerr << "k = " << j << ", w = " << totalw 
+// 		<< ", D = " << sqrt(h) << "\n";
+
+      if (sqrt(h) >= D)
+	 return 10.0;
+
+      k *= 2;
+   }
+//    std::cerr << "final: " << "w = " << totalw 
+// 	     << ", h = " << h << "\n";
+      
+   //std::cerr << "total w = " << totalw << "\n";
+   return h;
+}
+
+void Process_all(size_t k, double m, double D,
+		 const std::string &weights,
                  std::istream &isCloud, 
                  std::ostream &os)
 {
@@ -27,27 +87,35 @@ void Process_all(size_t k,
     cloudy::KD_tree kd(points);
     cloudy::Data_cloud result;
 
+    std::vector<double> w;
+    if (weights != "")
+    {
+       std::ifstream ifw(weights.c_str());
+       cloudy::load_data<double>(ifw, std::back_inserter(w));
+       std::cerr << "Processing distance to " << weights << std::endl;
+    }
+    else
+    {
+       size_t N = points.size();
+       w.resize (N);
+       std::fill(w.begin(), w.end(), 1.0/double(N));
+       m = 1.0/double(k);
+       std::cerr << "Processing k-distance" << std::endl;       
+    }
+    
+    
+    cloudy::misc::Progress_display progress(points.size(), std::cerr);
     for (size_t i = 0; i < points.size(); ++i)
     {
-       std::vector<size_t> knn;
+       ++progress;
+
        const size_t dimension(points[i].size());
+       cloudy::uvector bary;
+       double h = k_distance(k, m, D, kd, w, points[i], bary);
 
-       kd.find_knn(points[i], k, knn);
-
-       double h = 0.0;
-       cloudy::uvector bary(dimension);
-       std::fill(bary.begin(), bary.end(), 0);
-
-       for (size_t j = 0; j < k; ++j)
-       {
-	  bary += points[knn[j]];
-	  h += squared_norm(points[knn[j]]);
-       }
-       h /= k; bary /= k;
-
-       cloudy::uvector v(dimension + 1);
+       cloudy::uvector v(bary.size() + 1);
        std::copy(bary.begin(), bary.end(), v.begin());
-       v[dimension] = h - squared_norm(bary);
+       v[bary.size()] = h;
        result.push_back(v);
     }
 
@@ -59,19 +127,22 @@ int main(int argc, char **argv)
    std::map<std::string, std::string> options;
    std::vector<std::string> param;
    cloudy::misc::get_options (argc, argv, options, param);
-   size_t k  = cloudy::misc::to_unsigned(options["k"], 50);
+   std::string weights = cloudy::misc::to_str(options["w"], "");
+   size_t k = cloudy::misc::to_unsigned(options["k"], 50);
+   double m = cloudy::misc::to_double(options["m"], 0.0);
+   double D = cloudy::misc::to_double(options["D"], 0.0);
 
    if (param.size() == 2)
    {
       std::ifstream is(param[0].c_str());
       std::ofstream os(param[1].c_str());
-      Process_all(k, is, os);
+      Process_all(k, m, D, weights, is, os);
    }
    else if (param.size() == 1)
    {
       std::ifstream is(param[0].c_str());
-      Process_all(k, is, std::cout);
+      Process_all(k, m, D, weights, is, std::cout);
    }
    else
-      Process_all(k, std::cin, std::cout);
+     Process_all(k, m, D, weights, std::cin, std::cout);
 }

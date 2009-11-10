@@ -6,8 +6,11 @@
 #include <QLabel>
 #include <QSlider>
 #include <QCheckBox>
+#include <QPushButton>
+#include <QColorDialog>
 #include <iostream>
 #include <math.h>
+#include <cloudy/mesh/Gradient.hpp>
 
 namespace cloudy
 {
@@ -105,6 +108,40 @@ namespace cloudy
 	    {
 	       _value = v;
 	    }
+      };
+
+      inline QColor color_to_qcolor(const Color &c)
+      {
+	 return QColor(int(c._r*255.0),
+	               int(c._g*255.0),
+	               int(c._b*255.0));
+      }
+
+      inline Color qcolor_to_color(const QColor &c)
+      {
+	 return Color(c.redF(), c.greenF(), c.blueF());
+      }
+
+      class Editable_color: public QObject
+      {
+	    Q_OBJECT;
+	    Color &_value;
+
+	 public:
+	    Editable_color(Color &value):
+	       _value(value)
+	    {}
+
+	 public slots:
+	    void set_value(const QColor & v)
+	    {
+	       *(&_value) = qcolor_to_color(v);
+	    }
+
+	    void select_color()
+	    {
+	       set_value(QColorDialog::getColor(color_to_qcolor(_value)));
+	    } 
       };
 
 
@@ -243,6 +280,23 @@ namespace cloudy
 	       _layout->addWidget(box, _current_row, 1);
 	       _current_row++;
 	    }
+
+	    void add_color(const std::string &name, Color &ref)
+	    {
+	       QObject *edit = new Editable_color(ref);
+	       _editables.push_back(edit);
+
+	       QLabel *label = new QLabel();
+	       label->setText(name.c_str());
+
+	       QPushButton *box = new QPushButton();
+	       connect(box, SIGNAL(clicked()),
+	               edit, SLOT(select_color()));
+	       _layout->addWidget(label, _current_row, 0);
+	       _layout->addWidget(box, _current_row, 1);
+	       _current_row++;
+	    }
+
 
 	    void finish()
 	    {

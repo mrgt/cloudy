@@ -1,6 +1,7 @@
 #ifndef CLOUDY_INTEGRATORS_HPP
 #define CLOUDY_INTEGRATORS_HPP
 
+#include <cloudy/mesh/Mesh.hpp>
 #include <cloudy/linear/Linear.hpp>
 #include <math.h>
 
@@ -34,12 +35,12 @@ namespace cloudy {
 	                   const Vector &c)
 	    {
 	       const double  vol =  1.0/6.0*fabs(a * CGAL::cross_product(b,c));
-//f 0
+#if 0
 	       std::cerr << "a = " << a << "\n"
 			 << "b = " << b << "\n"
 			 << "c = " << c << "\n"
 			 << "vol = " << vol << "\n";
-//#endif
+#endif
 	       _result += vol;
 	    }
 	    
@@ -122,19 +123,30 @@ namespace cloudy {
       };
 
       //////////////////////////////////////////////////////////////////////
-
-      template <class K, class Functor>
-      class Tetrahedra_integrator {
+     template <class K>
+     class Mesh_integrator
+     {
+     public:
 	    typedef typename K::Point_3 Point;
-	    typedef typename K::Vector_3 Vector;
+	    typedef typename K::Vector_3 Vector;	
+       	    typedef Mesh Result_type;
 
-	    const Functor &_functor;
+     private:
 	    Point _center;
+            Mesh _result;
+
+            uvector uv(const Point &point)
+            {
+	      uvector v(3);
+	      v(0) = point.x();
+	      v(1) = point.y();
+	      v(2) = point.z();
+	      return v;
+            }
 
 	 public:
-	    Tetrahedra_integrator(const Point &center,
-	                          Functor &func):
-	       _center(center), _functor(func)
+	    Mesh_integrator(const Point &center):
+	       _center(center)
 	    {}
 
 	    inline
@@ -142,8 +154,17 @@ namespace cloudy {
 	                   const Vector &b,
 	                   const Vector &c)
 	    {
-	       _functor(_center, _center+a, _center+b, _center+c);
+	      _result.append_triangle(uv(_center+a),
+				      uv(_center+b),
+				      uv(_center+c));
 	    }
+
+
+       	    const Result_type &result() const
+	    {
+	       return _result;
+	    }
+	    
       };
 
    } 
