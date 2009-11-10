@@ -5,7 +5,6 @@ bool setup(cloudy::view::Viewer &w,
            const std::map<std::string, std::string> &options,
            const std::vector<std::string> &parameters)
 {
-
    Data_cloud_ptr cloud (new Data_cloud());
 
    if (parameters.size() < 1)
@@ -44,4 +43,5 @@ bool setup(cloudy::view::Viewer &w,
        
        w.add_drawer(Drawer_ptr(new Mesh_drawer(meshname, mesh)));
      }
+   return true;
 }

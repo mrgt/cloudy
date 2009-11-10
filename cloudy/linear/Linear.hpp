@@ -15,10 +15,12 @@ namespace cloudy
    
    namespace linear{
 
+#ifdef CLOUDY_USE_LAPACK
       // Lapack bindings
       bool sp_diagonalize(umatrix& A, uvector &eigenvalues);
       uvector sp_solve (const umatrix& A, const uvector &b);
       bool svd (const umatrix& A, umatrix &U, uvector &S, umatrix &Vt);
+#endif
    }
 }
 

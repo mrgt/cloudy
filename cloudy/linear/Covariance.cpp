@@ -1,12 +1,12 @@
 #include <cloudy/linear/Covariance.hpp>
-#include <boost/numeric/ublas/matrix_proxy.hpp>
+// #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <CGAL/linear_least_squares_fitting_3.h>
 
 namespace cloudy
 {
    namespace linear
    {
-#if USE_LAPACK
+#ifdef CLOUDY_USE_LAPACK
       bool
       covariance_extract_eigen(const umatrix &m, 
                                std::vector<double> &eig,

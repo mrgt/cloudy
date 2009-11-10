@@ -1,5 +1,6 @@
 #include <cloudy/linear/Linear.hpp>
 
+#ifdef CLOUDY_USE_LAPACK
 #include <boost/numeric/bindings/traits/ublas_matrix.hpp>
 #include <boost/numeric/bindings/traits/ublas_vector.hpp>
 #include <boost/numeric/bindings/traits/ublas_vector2.hpp>
@@ -7,6 +8,8 @@
 #include <boost/numeric/bindings/lapack/sysv.hpp>
 #include <boost/numeric/bindings/lapack/heev.hpp>
 #include <boost/numeric/bindings/lapack/gesvd.hpp>
+#endif
+
 #include <boost/numeric/ublas/lu.hpp> 
 #include <boost/numeric/ublas/io.hpp>
 
@@ -23,6 +26,8 @@ namespace cloudy
      }
 
    namespace linear {
+
+#ifdef CLOUDY_USE_LAPACK
    namespace lapack = boost::numeric::bindings::lapack;
 
    bool
@@ -59,6 +64,7 @@ namespace cloudy
       umatrix Ap(A);
       return (lapack::gesvd(Ap, S, U, Vt) == 0);
    }
+#endif
 
    }
 }
