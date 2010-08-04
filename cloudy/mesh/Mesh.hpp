@@ -47,6 +47,24 @@ namespace cloudy
 	    _flags = 0;
 	 }
 
+         size_t num_points() const
+         {
+	   return _points.size();
+	 }
+
+         size_t num_triangles() const
+         {
+	   return _triangles.size();
+	 }
+
+         const Mesh_triangle &
+	 triangle(size_t i) const
+         {
+	   return _triangles[i];
+	 }
+
+         void  export_pov(std::ostream &os);
+
 	 size_t insert_point(const uvector &p, 
 			     const uvector &n = uvector(),
 			     const Color &c = Color())
@@ -81,6 +99,9 @@ namespace cloudy
 
 	 double area() const;
 
+     // return the area of a given facet
+         double area(size_t i) const;
+
 	 void uniform_sample(Data_cloud &cl, size_t N);
 
 	 template <class Function>
@@ -107,6 +128,7 @@ namespace cloudy
 		 maxval = v;
 	       else if (v <= minval)
 		 minval = v;	       
+	       ++progress;
 	    }
 
 	    if (zero_average)
@@ -121,7 +143,6 @@ namespace cloudy
 	    {
 	       double t = (values[i] - minval) / (maxval - minval);
 	       _colors[i] = g(t);
-	       ++progress;
 	    }
 	 }
 

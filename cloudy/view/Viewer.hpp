@@ -14,8 +14,8 @@ namespace cloudy
    typedef std::vector<Line> Data_lines;
    
 
-   typedef cloudy::uvector uvector;
-   typedef cloudy::Data_cloud Data_cloud;
+     //typedef cloudy::uvector uvector;
+     //typedef cloudy::Data_cloud Data_cloud;
    typedef std::vector<double> Scalar_field;
 
    
@@ -24,6 +24,7 @@ namespace cloudy
    typedef boost::shared_ptr<Scalar_field> Scalar_field_ptr;
    typedef boost::shared_ptr<Data_indices> Data_indices_ptr;
    typedef boost::shared_ptr<Data_lines> Data_lines_ptr;
+   typedef boost::shared_ptr< std::vector<size_t> > Matching_ptr;
 
    inline void
    gl_uvertex(const uvector &v)
@@ -50,6 +51,7 @@ namespace cloudy
 
 	 virtual ~Drawer(){};
          virtual void draw(bool fast = false) = 0;
+         virtual void draw_pov(std::ostream &os) {}
 
 	 virtual void fill_editor(Editor *editor) 
 	 {
@@ -212,7 +214,7 @@ namespace cloudy
 		min = std::min(min, (*_field)[i]);
 	      }
 	    _low_threshold = min;
-	    editor->add_double_spin("Low threshold:", _low_threshold, min, max);
+	    editor->add_double("Low threshold:", _low_threshold, min, max);
 	 }
 	 
 	 virtual size_t stride()
@@ -292,6 +294,25 @@ namespace cloudy
 	 }
    };
 #endif
+
+     void _draw_mesh(const std::vector<Mesh_triangle> &triangles,
+		     const Data_cloud &points,
+		     size_t polygon_mode = GL_FILL)
+     {
+       glPolygonMode(GL_FRONT_AND_BACK, polygon_mode);
+
+       glBegin(GL_TRIANGLES);
+       for (size_t i = 0; i != triangles.size(); ++i)
+	 {
+	   const cloudy::Mesh_triangle &t = triangles[i];
+	   
+	   gl_uvertex(points[t.a]);
+	   gl_uvertex(points[t.b]);
+	   gl_uvertex(points[t.c]);
+	 }
+       glEnd();
+     }
+     
 
    class Direction_drawer: public Cloud_subdrawer
    {
@@ -409,20 +430,6 @@ namespace cloudy
          Mesh_ptr _mesh;
          bool _lines;
 
-     void __draw() 
-     {
-       	   glBegin(GL_TRIANGLES);
-	   for (size_t i = 0; i != _mesh->_triangles.size(); ++i)
-	     {
-	       const cloudy::Mesh_triangle &t = _mesh->_triangles[i];
-	       
-	       gl_uvertex(_mesh->_points[t.a]);
-	       gl_uvertex(_mesh->_points[t.b]);
-	       gl_uvertex(_mesh->_points[t.c]);
-	     }
-	   glEnd();
-     }
-
       public:
 	 Mesh_drawer(const std::string &name,
 	              const Mesh_ptr mesh):
@@ -433,20 +440,24 @@ namespace cloudy
 
      virtual void draw(bool fast)
 	 {
-	   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	   glEnable(GL_POLYGON_OFFSET_FILL);
 	   glPolygonOffset(1, 1);
 	   glColor3f(1.0, 0.8, 0.5);
-	   __draw();
+	   _draw_mesh(_mesh->_triangles, _mesh->_points, GL_FILL);
 	   glDisable(GL_POLYGON_OFFSET_FILL);
 
 	   if(_lines)
 	     {
-	       glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	       glColor3f(0.1, 0.1, 0.1);
-	       __draw();
+	       _draw_mesh(_mesh->_triangles, _mesh->_points, GL_LINE);
 	     }
 	 }
+
+         virtual void
+         draw_pov (std::ostream &os)
+         {
+	   _mesh->export_pov(os);
+         }
 
 	 virtual void fill_editor(Editor *editor) 
 	 {
@@ -482,6 +493,16 @@ namespace cloudy
 	    }
 	    
 	    postpaintGL();
+	 }
+
+         void
+         draw_pov (std::ostream &os)
+         {
+	    for (Drawer_list::iterator it =_drawers.begin();
+		 it != _drawers.end(); ++it)
+	    {
+	      if ((*it)->enabled()) (*it)->draw_pov(os);
+	    }	    
 	 }
 
 	 void add_drawer(Drawer_ptr dr)

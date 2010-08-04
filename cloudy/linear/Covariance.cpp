@@ -1,6 +1,10 @@
 #include <cloudy/linear/Covariance.hpp>
-// #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <CGAL/linear_least_squares_fitting_3.h>
+
+
+#ifdef CLOUDY_USE_LAPACK
+#include <boost/numeric/ublas/matrix_proxy.hpp>
+#endif
 
 namespace cloudy
 {

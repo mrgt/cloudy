@@ -3,6 +3,7 @@
 
 #include <QDoubleSpinBox>
 #include <QGridLayout>
+#include <QLineEdit>
 #include <QLabel>
 #include <QSlider>
 #include <QCheckBox>
@@ -89,6 +90,17 @@ namespace cloudy
 	    void set_value(double v)
 	    {
 	       _value = v;
+	    }
+
+	    void set_value(const QString&s)
+	    {
+	      bool ok;
+	      double d = s.toDouble(&ok);
+
+	      if (ok)
+		{
+		  _value = d;
+		}
 	    }
       };
 
@@ -192,6 +204,15 @@ namespace cloudy
 	       QLabel *label = new QLabel();
 	       label->setText(name.c_str());
 
+#if 1
+	       QLineEdit *box = new QLineEdit;
+	       box->setText(QString::number(ref));
+
+	       connect(box, SIGNAL(textChanged(const QString&)),
+	               edit, SLOT(set_value(const QString&)));
+	       connect(box, SIGNAL(textChanged(const QString&)),
+	               this, SLOT(stateChangedSlot()));
+#else
 	       //QDoubleSpinBox *box = new QDoubleSpinBox();
 	       DoubleSlider *box = new DoubleSlider;
 	       box->setRange(min,max);
@@ -202,6 +223,7 @@ namespace cloudy
 	               edit, SLOT(set_value(double)));
 	       connect(box, SIGNAL(valueChanged(double)),
 	               this, SLOT(stateChangedSlot()));
+#endif
 
 	       _layout->addWidget(label, _current_row, 0);
 	       _layout->addWidget(box, _current_row, 1);

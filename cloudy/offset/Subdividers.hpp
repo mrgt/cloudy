@@ -36,6 +36,26 @@ namespace cloudy {
 	       return ig.aggregate(na,nb,nc);
 	    }
       };
+
+      class No_subdivider
+      {
+	 double _radius;
+	    
+	 public:
+	    No_subdivider(double radius = 0.0):
+	                     _radius(radius)
+	    {}
+
+	    template <class Integrator>
+	    void aggregate(Integrator &ig,
+	                   const typename Integrator::Vector &a,
+			   const typename Integrator::Vector &b,
+	                   const typename Integrator::Vector &c)
+	    {
+	       return ig.aggregate(a,b,c);
+	    }
+      };
+
       
      template<class Vector>
      double length(const Vector &v)
@@ -125,33 +145,34 @@ namespace cloudy {
 			    double eps,
 			    OutputIterator iter)
 	{
+#if 0
 	  *iter++ = b;
 	  Vector v = (b + c)/2.0;
 	  //- center;
 	  //v = center + v * (radius/length(v));
 	  *iter++ = v;
 	  *iter++ = c;
-#if 0
-	  Vector xaxis = (b_circle - circle_center);
-	  xaxis = xaxis / circle_radius;
-	  Vector yaxis = CGAL::cross_product(circle_normal, xaxis);
-	  Vector diffc = c_circle - circle_center;
-	  double theta = atan2(diffc * xaxis, diffc * yaxis);
+#else
+	  Vector xaxis = (b - center);
+	  xaxis = xaxis / length(xaxis);
+	  Vector yaxis = CGAL::cross_product(xaxis, normal);
+	  Vector diffc = c - center;
+	  double theta = atan2(diffc * yaxis, diffc * xaxis);
 	  
-	  size_t N = std::floor((fabs(theta) * circle_radius)/eps)+1;
+	  size_t N = std::floor((fabs(theta) * radius)/eps)+1;
 	  double theta_increment = theta/N;
 	  DISPLAY(theta);
 	  DISPLAY(N);	    
 	  
-	  *iter ++ = b_circle;
+	  *iter ++ = b;
 	  theta = 0.0;
 	  for (size_t i = 1; i < N; ++i)
 	    {
 	      *iter ++ = 
-		(circle_center + cos(theta) * xaxis + sin(theta) * yaxis);
+		(center + cos(theta) * xaxis + sin(theta) * yaxis);
 	      theta += theta_increment;
 	    }
-	  *iter++ = c_circle;
+	  *iter++ = c;
 #endif
 	}
 
@@ -206,6 +227,7 @@ namespace cloudy {
 				      pow(circle_distance, 2.0));
 	  DISPLAY(circle_radius);
 	  Vector circle_center = circle_distance * triangle_normal;
+	  DISPLAY(circle_center);
 	  Vector b_circle = a_inside
 	    ? segment_sphere_intersection(a, b) 
 	    : segment_sphere_intersection(b, a);
@@ -272,10 +294,6 @@ namespace cloudy {
 				sqb <= sqrad,
 				sqc <= sqrad))
 	       {
-		  case b111:
-		     ig.aggregate(a,b,c);
-		     break;
-
 		  case b000:
 		    // FIXME: case where the three points are outside,
 		    // but there is an intersection.
@@ -285,29 +303,33 @@ namespace cloudy {
 						 _radius*c/sqrt(sqc));
 		     break;
 
-	          case b100:
-		    split_intersecting_triangle(ig, true, a, b, c);
-		    break;
-
-	          case b011:
-		    split_intersecting_triangle(ig, false, a, b, c);
+	          case b001:
+		    split_intersecting_triangle(ig, true, c, a, b);
 		    break;
 
 	          case b010:
 		    split_intersecting_triangle(ig, true, b, c, a);
 		    break;
 
-	          case b101:
-		    split_intersecting_triangle(ig, false, b, c, a);
+	          case b011:
+		    split_intersecting_triangle(ig, false, a, b, c);
 		    break;
 
-	          case b001:
-		    split_intersecting_triangle(ig, true, c, a, b);
+	          case b100:
+		    split_intersecting_triangle(ig, true, a, b, c);
+		    break;
+
+	          case b101:
+		    split_intersecting_triangle(ig, false, b, c, a);
 		    break;
 
 	          case b110:
 		    split_intersecting_triangle(ig, false, c, a, b);
 		    break;
+
+		  case b111:
+		     ig.aggregate(a,b,c);
+		     break;
 	       }	       
 	}
      };

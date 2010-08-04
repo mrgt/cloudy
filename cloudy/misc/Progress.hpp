@@ -3,11 +3,11 @@
 
 #include <iostream>
 
-namespace cloudy
+namespace cloudy 
 {
-   namespace misc
-   {
-      class Progress_display
+  namespace misc
+  {
+    class Progress_display
       {
 	    unsigned long _expected, _current;
 	    unsigned long _next;
@@ -48,7 +48,7 @@ namespace cloudy
 		  _os << "|" << std::endl;
 	    }
       };
-   }
+  }
 }
 
 #endif

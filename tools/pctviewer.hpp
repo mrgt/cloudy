@@ -9,6 +9,7 @@
 #include <QHBoxLayout>
 
 using namespace cloudy::view;
+using namespace cloudy;
 
 bool setup(cloudy::view::Viewer &w,
            const std::map<std::string, std::string> &options,

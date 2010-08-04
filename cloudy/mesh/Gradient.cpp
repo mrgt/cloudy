@@ -1,6 +1,7 @@
 #include <cloudy/mesh/Gradient.hpp>
 #include <iostream>
 #include <algorithm>
+#include <sstream>
 
 namespace cloudy
 {
@@ -27,25 +28,33 @@ namespace cloudy
       
       // skip name
       from.getline(line, 256);
+
       size_t N;
-      from >> N;
-      
+      {
+	from.getline(line, 256);
+	std::stringstream Nfrom (line);
+	Nfrom >> N;
+      }
+	
       // read gradients
       for (size_t i = 0; i < N; ++i)
       {
 	 Gradient_color c;	       
 	 double middle, blend, type, sa, ea;
+
+	 from.getline(line, 256);
+	 std::stringstream lfrom (line);
 	 
-	 from >> c._start >> middle >> c._end;
-	 from >> c._start_color._r
-	      >> c._start_color._g
-	      >> c._start_color._b
-	      >> sa;
-	 from >> c._end_color._r
-	      >> c._end_color._g
-	      >> c._end_color._b
-	      >> ea;
-	 from >> blend >> type;
+	 lfrom >> c._start >> middle >> c._end;
+	 lfrom >> c._start_color._r
+	       >> c._start_color._g
+	       >> c._start_color._b
+	       >> sa;
+	 lfrom >> c._end_color._r
+	       >> c._end_color._g
+	       >> c._end_color._b
+	       >> ea;
+	 lfrom >> blend >> type;
 
 	 
 	 std::cerr << "Gradient Begin " << 
@@ -79,30 +88,11 @@ namespace cloudy
 	    break;
 	 }
       }
-
-//       size_t left = 0, right = _gradient_colors.size()-1;
-      
-//       if (_gradient_colors[left]._start >= t)
-// 	 right = left;
-      
-//       if (_gradient_colors[right]._end <= t)
-// 	 left = right;
-      
-//       while (left != right)
-//       {
-// 	 size_t mid = (left+right)/2;
-	 
-// 	 if (_gradient_colors[mid]._end >= t)
-// 	    right = mid;
-// 	 if (_gradient_colors[mid]._start <= t)
-// 	    left = mid;
-// 	 std::cerr << left << " " << mid << " " << right << " LMR\n";
-//       }
+      //      std::cerr << " t = " << t << " P = " << P << "\n";
       
       const Gradient_color & c = _gradient_colors[P];
       t = std::max(std::min(t, c._end), c._start);
       double l = (t - c._start)/(c._end - c._start);
-      //std::cerr << "t=" << t  << " i=" << P << "\n";
 
       return (1.0 - l) * c._start_color + l * c._end_color;
    };

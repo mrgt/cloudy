@@ -5,12 +5,12 @@
 #include <qevent.h>
 #include <cloudy/view/Director.hpp>
 #include <boost/numeric/ublas/vector.hpp>
+#include <cloudy/Cloud.hpp>
 
 namespace cloudy
 {
    namespace view
    {
-      typedef boost::numeric::ublas::vector<double> uvector;
 
       // shortcut to create a 3D vector
       inline uvector uv3(double x, double y, double z)
