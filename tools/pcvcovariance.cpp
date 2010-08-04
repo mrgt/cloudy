@@ -72,7 +72,7 @@ bool setup(cloudy::view::Viewer &w,
       normals->push_back(D[0]);
       K1->push_back(D[1]);
       K2->push_back(D[2]);
-      anisotropy->push_back(V[1]/V[2]);
+      anisotropy->push_back(V[1]/(V[0] + V[1] + V[2]));
       ++progress;
    }
    std::cerr << "done\n";

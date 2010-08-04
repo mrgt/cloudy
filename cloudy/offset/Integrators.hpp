@@ -34,13 +34,15 @@ namespace cloudy {
 	                   const Vector &b,
 	                   const Vector &c)
 	    {
-	       const double  vol =  1.0/6.0*fabs(a * CGAL::cross_product(b,c));
+	       const double  vol =  1.0/6.0*(a * CGAL::cross_product(b,c));
+
 #if 0
 	       std::cerr << "a = " << a << "\n"
 			 << "b = " << b << "\n"
 			 << "c = " << c << "\n"
 			 << "vol = " << vol << "\n";
 #endif
+
 	       _result += vol;
 	    }
 	    

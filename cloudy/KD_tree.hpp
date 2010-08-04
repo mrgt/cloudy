@@ -9,9 +9,9 @@ namespace cloudy
 {
    class KD_tree
    {
-	 std::vector<ANNpoint> _points;
+         std::vector<ANNpoint> _points;
 	 size_t _dim;
-	 ANNkd_tree* _tree;
+         ANNkd_tree* _tree;
 	 
 	 template <class V>
 	 void

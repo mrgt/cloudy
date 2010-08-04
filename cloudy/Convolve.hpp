@@ -71,12 +71,42 @@ namespace cloudy
       _kd.find_points_in_ball(position, _f.support_radius(),
 			      indices);
       
-      Type res = _field[indices[0]];
-      for (size_t j = 1; j < indices.size(); ++j)
-	res += _f(_kd[indices[j]]) * _field[indices[j]];      
-      return res;
+      if (indices.size() > 0)
+	{
+	  Type res = _field[indices[0]];
+	  for (size_t j = 1; j < indices.size(); ++j)
+	    res += _f(_kd[indices[j]]) * _field[indices[j]];      
+	  return res;
+	}
+      else
+	{
+	  size_t nn = _kd.find_nn(position);  
+	  return _field[nn];
+	}
     }
   };
+
+  template <class Type>
+  class Nearest_neighbor_functor
+  {
+    const KD_tree &_kd;
+    const std::vector<Type> &_field;
+
+  public:
+    Nearest_neighbor_functor(const KD_tree &kd,
+			     const std::vector<Type> &input):  _kd(kd),
+							       _field(input)
+    {}
+
+    Type operator() (const uvector &position) const
+    {
+      std::vector<size_t> indices;
+      
+      size_t nn = _kd.find_nn(position);  
+      return _field[nn];
+    }
+  };
+
 
   template<class Type>
   class Convolution_tent_functor:

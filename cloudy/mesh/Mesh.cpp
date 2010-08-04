@@ -13,15 +13,70 @@ namespace cloudy
       {
 	 char s[1000];
 	 is.getline(s, 1000);
-
+	 
 	 if (s[0] != '#')
 	    line = s;
       } while(line == "");
       return line;
    }
 
+  class pov_vector
+  {
+  public:
+    const uvector &_v;
+  public:
+    pov_vector(const uvector &v): _v(v)
+    {
+    }
+  };
+
+  std::ostream &
+  operator << (std::ostream &os, const pov_vector &v)
+  {
+    return os << "<" << v._v(0) << ", " << v._v(1) << ", " << v._v(2) << ">";
+  }
+
+  
+
+  void
+  Mesh::export_pov(std::ostream &os)
+  {
+    os << "mesh\n{\n";
+      for (size_t i = 0; i < _triangles.size(); ++i)
+      {
+	if (_flags & MESH_NORMAL)
+	  {
+	    os << "  smooth_triangle\n"
+	       << "  {\n"
+	       << pov_vector(_points[_triangles[i].a]) << ",\n"
+	       << pov_vector(_normals[_triangles[i].a]) << ",\n"
+	       << pov_vector(_points[_triangles[i].b]) << ",\n"
+	       << pov_vector(_normals[_triangles[i].b]) << ",\n"
+	       << pov_vector(_points[_triangles[i].c]) << ",\n"
+	       << pov_vector(_normals[_triangles[i].c]) << "\n"
+	       << "  }\n";
+	  }
+	else
+	  {
+	    os << "  triangle\n"
+	       << "  {\n"
+	       << pov_vector(_points[_triangles[i].a]) << ",\n"
+	       << pov_vector(_points[_triangles[i].b]) << ",\n"
+	       << pov_vector(_points[_triangles[i].c]) << "\n"
+	       << "  }\n";
+	  }
+      }
+      os << "}\n\n";
+  }
+
    void Mesh::read_off(std::istream &is)
    {
+     if (!is) 
+       {
+	 std::cerr << "Mesh::read_off: Unable to read file\n";
+	 return;
+       }
+
       clear();
 
       std::string type = off_read_line(is);
@@ -44,6 +99,12 @@ namespace cloudy
 
       std::istringstream ss(off_read_line(is));
       ss >> Nvertices >> Nfaces >> Nedges; 
+
+#if 0
+      std::cerr << "Nvertices: " << Nvertices << std::endl;
+      std::cerr << "Nfaces: " << Nfaces << std::endl;
+      std::cerr << "Nedges: " << Nedges << std::endl;
+#endif
 
       for (size_t i = 0; i < Nvertices; ++i)
       {
@@ -136,6 +197,17 @@ namespace cloudy
       }
       return T;
    }
+
+
+   double
+   Mesh::area(size_t i) const
+   {
+     assert(i < num_triangles());
+     return cloudy::area(_points[_triangles[i].a],
+			 _points[_triangles[i].b],
+			 _points[_triangles[i].c]);    
+   }
+
 
    void
    Mesh::uniform_sample(Data_cloud &cl, size_t N)

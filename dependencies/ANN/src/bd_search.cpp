@@ -36,6 +36,8 @@
 //	bd_shrink::ann_search - search a shrinking node
 //----------------------------------------------------------------------
 
+ANNpoint		    ANNkdQ;			// query point
+ANNmin_k		    *ANNkdPointMK;	// set of k closest points
 void ANNbd_shrink::ann_search(ANNdist box_dist)
 {
 												// check dist calc term cond.

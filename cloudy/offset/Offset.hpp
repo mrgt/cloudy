@@ -64,6 +64,7 @@ namespace cloudy { namespace offset {
 	       _functor(a,b,c);
 	    }
       };
+
 #if 0
       template <class Subdivider, class RT, class Functor>
       void

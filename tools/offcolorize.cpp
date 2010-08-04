@@ -18,11 +18,17 @@ void Process_all(std::istream &isCloud,
                  std::ostream &os,
 		 double r,
 		 size_t comp = 0,
+		 size_t clamp = 3,
 		 double tmax = -1.0)
 {
   std::cerr << "loading cloud\n";
     cloudy::Data_cloud points;
     cloudy::load_cloud(isCloud, points);
+  for (size_t i = 0; i < points.size(); ++i)
+    {
+      points[i].resize(clamp);
+    }
+
 
   std::cerr << "loading field\n";
     cloudy::Data_cloud ifield;
@@ -56,7 +62,7 @@ void Process_all(std::istream &isCloud,
     if (tmax > 0.0)
       mesh.simple_tesselate(tmax);
 
-    mesh.simple_colorize(f, ggr, true);
+    mesh.simple_colorize(f, ggr);
     mesh.write_off(os);
 }
 
@@ -69,11 +75,12 @@ int main(int argc, char **argv)
    double r = cloudy::misc::to_double(options["r"], 0.05);
    double tmax = cloudy::misc::to_double(options["tmax"], -1);
    size_t comp = cloudy::misc::to_int(options["comp"], 0);
+   size_t clamp = cloudy::misc::to_int(options["clamp"], 3);
    
 
    if (param.size() < 2)
    {
-      std::cerr << "Usage: " << argv[0] << " file.cloud file.p file.ggr file.off [outfile.off -r radius -comp component -tmax triangle max size]"
+      std::cerr << "Usage: " << argv[0] << " file.cloud file.p file.ggr file.off [outfile.off -r radius -comp component -clamp dimension -tmax triangle max size]"
 		<< std::endl;
       return -1;
    }
@@ -87,8 +94,8 @@ int main(int argc, char **argv)
    {
      std::cerr << "outputing in " << param[4] << "\n";
       std::ofstream os(param[4].c_str());
-      Process_all(isCloud, isField, isGradient, isOff, os, r, comp, tmax);
+      Process_all(isCloud, isField, isGradient, isOff, os, r, comp, clamp, tmax);
    }
    else
-     Process_all(isCloud, isField, isGradient, isOff, std::cout, r, comp, tmax);
+     Process_all(isCloud, isField, isGradient, isOff, std::cout, r, comp, clamp, tmax);
 }
