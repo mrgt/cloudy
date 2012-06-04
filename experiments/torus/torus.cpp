@@ -80,6 +80,12 @@ bool setup(cloudy::view::Viewer &w,
   w.add_drawer(Drawer_ptr(c));
   w.add_drawer(Drawer_ptr(new Direction_drawer("Normals", *c, normals)));
   w.add_drawer(Drawer_ptr(new Direction_drawer("Real Normals", *c, rnormals)));
+  w.add_drawer(Drawer_ptr(new Direction_drawer("K1", *c, K1)));
+  w.add_drawer(Drawer_ptr(new Direction_drawer("K2", *c, K2)));
+
+  cloudy::view::Mesh_ptr mesh (new cloudy::Mesh());
+  generate_mesh(torus, 20, *mesh);
+  w.add_drawer(Drawer_ptr(new Mesh_drawer("Mesh", mesh)));
    
    return true;
 }

@@ -2,8 +2,8 @@
 #include <fstream>
 
 bool setup(cloudy::view::Viewer &w,
-           const std::map<std::string, std::string> &options,
-           const std::vector<std::string> &parameters)
+           std::map<std::string, std::string> &options,
+           std::vector<std::string> &parameters)
 {
 
   cloudy::view::Mesh_ptr mesh (new cloudy::Mesh());

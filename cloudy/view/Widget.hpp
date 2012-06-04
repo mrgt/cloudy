@@ -3,9 +3,12 @@
 
 #include <qgl.h>
 #include <qevent.h>
-#include <cloudy/view/Director.hpp>
+
+#ifndef Q_MOC_RUN
 #include <boost/numeric/ublas/vector.hpp>
+#include <cloudy/view/Director.hpp>
 #include <cloudy/Cloud.hpp>
+#endif
 
 namespace cloudy
 {

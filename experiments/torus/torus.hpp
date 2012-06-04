@@ -4,6 +4,7 @@
 #include <cloudy/random/Random.hpp>
 #include <fstream>
 #include <cloudy/Cloud.hpp>
+#include <cloudy/mesh/Mesh.hpp>
 
 using namespace cloudy;
 inline uvector uv3 (double x, double y, double z)
@@ -104,6 +105,36 @@ inline void generate(const Torus &torus, size_t N,
       uvector uv = randball(engine);
       if (torus.is_inside(uv))
 	cloud.push_back(torus.project(uv));
+    }
+}
+
+inline void generate_mesh(const Torus &otor, size_t n,
+			  Mesh &mesh)
+{
+  // n for R, m for r
+  Torus tor = otor; tor._r *= .96;
+  size_t m = n; //(size_t) ceil(double(n) * tor._r/tor._R);
+  double inctheta = 2*M_PI/double(n);
+  double incphi = 2*M_PI/double(n);
+  double theta = 0.0, phi = 0.0;
+   
+  for (size_t i = 0; i <= n; ++i)
+    {
+      double thetan = theta + inctheta;
+
+      for (size_t i = 0; i <= m; ++i)
+	{
+	  double phin = phi + incphi;
+	  uvector a = tor.torus_to_xyz(uv3(theta,  phi,  tor._r));
+	  uvector b = tor.torus_to_xyz(uv3(thetan, phi,  tor._r));
+	  uvector c = tor.torus_to_xyz(uv3(thetan, phin, tor._r));
+	  uvector d = tor.torus_to_xyz(uv3(theta,  phin, tor._r));
+
+	  mesh.append_triangle (a, b, c);
+	  mesh.append_triangle (a, c, d);
+	  phi = phin;
+	}
+      theta = thetan;
     }
 }
 

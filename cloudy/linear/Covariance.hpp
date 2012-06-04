@@ -19,6 +19,10 @@ namespace cloudy
       covariance_sort_eigen(std::vector<double> &eig,
                             Data_cloud &directions,
                             bool descending = true);
+
+     void
+     covariance_add_vector(umatrix &m,
+			   const uvector &v);
    }
 }
 

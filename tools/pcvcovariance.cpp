@@ -6,8 +6,8 @@
 using namespace cloudy::linear;
 
 bool setup(cloudy::view::Viewer &w,
-           const std::map<std::string, std::string> &options,
-           const std::vector<std::string> &parameters)
+           std::map<std::string, std::string> &options,
+           std::vector<std::string> &parameters)
 {
    Data_cloud_ptr cloud (new Data_cloud());
    Data_cloud_ptr covariance (new Data_cloud());
@@ -86,7 +86,6 @@ bool setup(cloudy::view::Viewer &w,
    w.add_drawer(Drawer_ptr(new Direction_drawer("K2", *c, K2)));
    std::cerr << "K2\n";
 
-
    if (parameters.size() == 3)
      {
        std::string meshname = parameters[2];
@@ -101,6 +100,9 @@ bool setup(cloudy::view::Viewer &w,
      }
 
    std::cerr << "initialization: done\n";
+
+   double angle = 15 * (M_PI/180);
+   c->set_low_threshold(angle * angle);
 
    return true;
 }

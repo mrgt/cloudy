@@ -3,6 +3,7 @@
 #include <string>
 #include <list>
 #include <sstream>
+#include <time.h>
 
 namespace cloudy
 {
@@ -212,31 +213,37 @@ namespace cloudy
    void
    Mesh::uniform_sample(Data_cloud &cl, size_t N)
    {
-      boost::mt19937 rng;
+     boost::mt19937 rng (static_cast<std::size_t>(time(0)));
       
       cl.clear();
 
       double density = N / area();
-      boost::uniform_real<> u01;
-	 
+
+      std::vector<double> cumareas; double totarea = 0;
       for (size_t i = 0; i < _triangles.size(); ++i)
       {
-	 double a = cloudy::area(_points[_triangles[i].a],
-				 _points[_triangles[i].b],
-				 _points[_triangles[i].c]);
+	totarea += cloudy::area(_points[_triangles[i].a],
+				_points[_triangles[i].b],
+				_points[_triangles[i].c]);
+	cumareas.push_back(totarea);
+      }
 
-	 size_t Nt = size_t(floor(a * density));
-	 double remain = a * density - Nt;
+      boost::uniform_real<> u01;
+      
+      for (size_t i = 0; i < N; ++i)
+      {
+	double f = u01(rng) * totarea;
+	size_t t = 0;
+	
+	while (t < cumareas.size() && cumareas[t] < f)
+	  ++t;
 
-	 if(u01(rng) < remain)	    
-	    Nt = Nt + 1;
+	cloudy::random::Random_point_on_triangle<uvector>
+	  R(_points[_triangles[t].a],
+	    _points[_triangles[t].b],
+	    _points[_triangles[t].c]);
 
-	 cloudy::random::Random_point_on_triangle<uvector>
-	   R(_points[_triangles[i].a],
-	     _points[_triangles[i].b],
-	     _points[_triangles[i].c]);
-	 for (size_t j = 0; j < Nt; ++j)
-	    cl.push_back(R(rng));
+	cl.push_back(R(rng));
       }
    }
 
