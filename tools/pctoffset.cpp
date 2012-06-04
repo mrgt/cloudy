@@ -134,7 +134,7 @@ void Process_all(std::istream &is,  std::ostream &os,
    }
    else if (type == INTEGRATION_MESH)
    {
-#if 1
+#if 0
      Batch_integrate< Tesselate_subdivider, Mesh_integrator<K> >
        (rt, vertices.begin(), vertices.end(), R, cell, os);
 #else

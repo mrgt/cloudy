@@ -2,8 +2,8 @@
 #include <fstream>
 
 bool setup(cloudy::view::Viewer &w,
-           const std::map<std::string, std::string> &options,
-           const std::vector<std::string> &parameters)
+           std::map<std::string, std::string> &options,
+           std::vector<std::string> &parameters)
 {
    Data_cloud_ptr cloud (new Data_cloud());
 
@@ -19,25 +19,19 @@ bool setup(cloudy::view::Viewer &w,
 
    Scalar_field_ptr weights;
 
-#if 0
-   if (parameters.size() >= 2)
+   if (parameters.size() >= 2 && 
+       parameters[1].find(".p") != std::string::npos)
      {
        std::ifstream fs(parameters[1].c_str());
        weights = Scalar_field_ptr(new std::vector<double>());
        cloudy::load_data<double>(fs, std::back_inserter(*weights));
-
-       for (size_t i = 0; i < weights->size(); ++i)
-	 {
-	   (*weights)[i] *= weights->size();
-	 }
      }
-#endif
    
    w.add_drawer(Drawer_ptr(new Cloud_drawer("cloud", cloud, weights)));
 
    // temporary
-
-   if (parameters.size() == 2)
+   if (parameters.size() == 2 && 
+       parameters[1].find(".off") != std::string::npos)
      {
        std::string meshname = parameters[1];
        cloudy::view::Mesh_ptr mesh (new cloudy::Mesh());
@@ -46,5 +40,6 @@ bool setup(cloudy::view::Viewer &w,
        
        w.add_drawer(Drawer_ptr(new Mesh_drawer(meshname, mesh)));
      }
+
    return true;
 }

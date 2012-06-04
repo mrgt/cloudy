@@ -164,6 +164,7 @@ namespace cloudy
          }
    };
 
+  inline
   std::ostream &
   operator << (std::ostream &os, const Mesh &mesh)
   {

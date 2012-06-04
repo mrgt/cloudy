@@ -38,8 +38,12 @@ set(QT_USE_QTOPENGL 1)
 set(QT_USE_QTXML 1)
 include(${QT_USE_FILE})
 
+link_libraries(cloudy ${QT_LIBRARIES})
+
 add_executable(pcvcloud pcvcloud.cpp)
 target_link_libraries(pcvcloud cloudy ${QT_LIBRARIES})
+
+add_executable(pcvkcloud pcvkcloud.cpp)
 
 add_executable(pcvmatching pcvmatching.cpp)
 target_link_libraries(pcvmatching cloudy ${QT_LIBRARIES})

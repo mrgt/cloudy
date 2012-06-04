@@ -3,6 +3,7 @@
 #include <cloudy/Cloud.hpp>
 #include <cloudy/mesh/Mesh.hpp>
 #include <boost/shared_ptr.hpp>
+#include <GL/glu.h>
 #include <QToolBox>
 
 namespace cloudy
@@ -72,8 +73,10 @@ namespace cloudy
 	 double _percentage;
          double _radius;
          bool _spheres;
+         bool _power;
          int _sphere_tessel;
-         double _low_threshold;
+     double _low_threshold;
+     bool _default_low_threshold;
 	 std::vector<bool> _points_enabled;
 	 
       public:
@@ -86,8 +89,10 @@ namespace cloudy
 	    _percentage(1.0),
 	    _radius(1.0),
 	    _spheres(false),
+	    _power(false),
 	    _sphere_tessel(8),
 	    _low_threshold(0.0),
+	    _default_low_threshold(false),
 	    _points_enabled()
 	 {}
 
@@ -105,6 +110,12 @@ namespace cloudy
 	    return _cloud->size();
 	 }
 
+         void set_low_threshold(double l)
+         {
+	   _low_threshold = l;
+	   _default_low_threshold = true;
+	 }
+
 	 inline
 	 const uvector &point(size_t i)
 	 {
@@ -116,18 +127,16 @@ namespace cloudy
 	    if (_cloud->size() == 0)
 	       return;
 
-	    
-// 	    double low_thresh = 0.0;
-// 	    if (_field)
-// 	    {
-// 	       double minW = (*_field)[0], maxW = (*_field)[0];
-// 	       for (size_t i = 0; i < _field->size(); ++i)
-// 	       {
-// 		  minW = std::min(minW, (*_field)[i]);
-// 		  maxW = std::max(maxW, (*_field)[i]);
-// 	       }
-// 	       low_thresh = minW + _low_threshold * (maxW - minW);
-// 	    }
+	    double minW = std::numeric_limits<double>::infinity(),
+	      maxW = -std::numeric_limits<double>::infinity();
+	    if (_field && !_power)
+	      {
+		for (size_t i = 0; i < _field->size(); ++i)
+		  {
+		    minW = std::min(minW, (*_field)[i]);
+		    maxW = std::max(maxW, (*_field)[i]);
+		  }
+	      }
 
 	    const size_t strid = stride();
 	    if (_points_enabled.size() != num_points())
@@ -157,12 +166,27 @@ namespace cloudy
 	     
 	      for (size_t i = 0; i < num_points(); ++i)
 		{
-		  double rr = (*_field)[i]*_radius/1000.0f;
+		  double rr;
+		  if (_power)
+		    { 
+		      rr = pow(_radius,2) - (*_field)[i];
 
-		  if (!point_enabled(i))
-		    continue;
+		  // if (i > num_points() - 50)
+		  //   {
+		  //     std::cerr << "w = " << (*_field)[i] << "\n";
+		  //     std::cerr << "rr = " << rr << "\n";
+		  //   }
+
+		      if (rr <= 0 || !point_enabled(i))
+			continue;
+
+		      rr = sqrt(rr);
+		    }
+		  else
+		    rr = 0.05 * ((*_field)[i] - minW) / (maxW - minW);
 
 		  size_t div = _sphere_tessel;
+
 		  if (rr >= 0.1)
 		    div *= 4;
 
@@ -201,6 +225,7 @@ namespace cloudy
 	    editor->add_double("Percentage:", _percentage);
 	    editor->add_double_spin("Radius:", _radius, 0.0, 10.0);
 	    editor->add_bool("Spheres?", _spheres);
+	    editor->add_bool("Power?", _power);
 	    editor->add_integer_spin("Tesselation", _sphere_tessel, 0, 16);
 
 	    
@@ -213,7 +238,8 @@ namespace cloudy
 		max = std::max(max, (*_field)[i]);
 		min = std::min(min, (*_field)[i]);
 	      }
-	    _low_threshold = min;
+	    if (!_default_low_threshold)
+	      _low_threshold = min;
 	    editor->add_double("Low threshold:", _low_threshold, min, max);
 	 }
 	 

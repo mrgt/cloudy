@@ -85,6 +85,18 @@ namespace cloudy
 	 return m;
       }
 
+     void
+     covariance_add_vector(umatrix &m,
+			   const uvector &v)
+     {
+       const size_t dim = v.size();
+
+       for (size_t j = 0; j < dim; ++j)
+	 for (size_t k = 0; k < dim; ++k)
+	   m(j,k) += v[j] * v[k];        
+     }
+
+
       struct eigen
       {
 	    double value;

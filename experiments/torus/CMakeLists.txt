@@ -6,5 +6,5 @@ add_executable(torus torus.cpp)
 target_link_libraries(torus cloudy ${QT_LIBRARIES})
 
 add_executable(gentorus gentorus.cpp)
-target_link_libraries(torus cloudy)
+target_link_libraries(gentorus cloudy)
 

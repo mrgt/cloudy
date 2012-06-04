@@ -12,8 +12,8 @@ using namespace cloudy::view;
 using namespace cloudy;
 
 bool setup(cloudy::view::Viewer &w,
-           const std::map<std::string, std::string> &options,
-           const std::vector<std::string> &parameters);
+           std::map<std::string, std::string> &options,
+           std::vector<std::string> &parameters);
 
 int main(int argc, char** argv)
 {  
